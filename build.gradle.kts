@@ -48,6 +48,9 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
 
+    // Logging
+    implementation("io.github.oshai", "kotlin-logging-jvm", "5.1.0")
+
     // IPC
     implementation("org.zeromq:jeromq:0.5.2")
 
