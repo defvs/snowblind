@@ -1,5 +1,7 @@
 package nodes.dataflow
 
+import kotlin.math.roundToInt
+
 typealias Parameter = Pair<ParameterType, Double>
 
 data class NodeParameterData(
@@ -9,18 +11,33 @@ data class NodeParameterData(
 
 fun Map<ParameterType, NodeParameterData>.getValue(key: ParameterType) = this[key]!!.data
 
-enum class ParameterType(readableName: String) { // TODO: add human-printable value lambda to each
+private object ValueConverter {
+    val asInteger: (Double) -> String = { it.roundToInt().toString() }
+    fun asDecimal(digits: Int): (Double) -> String = { String.format("%.${digits}d", it) }
+    val asDegrees: (Double) -> String = { it.times(360).roundToInt().toString() }
+    val as8bitColor: (Double) -> String = { it.times(256).roundToInt().toString() }
+}
+
+enum class ParameterType(
+    readableName: String,
+    valueConverter: (Double) -> String,
+) { // TODO: add human-printable value lambda to each
     // Base positions
-    BasePosX("X Position"), BasePosY("Y Position"),
+    BasePosX("X Position", ValueConverter.asInteger),
+    BasePosY("Y Position", ValueConverter.asInteger),
 
     // Offset positions
-    OffsetX("X Offset"), OffsetY("Y Offset"),
+    OffsetX("X Offset", ValueConverter.asInteger),
+    OffsetY("Y Offset", ValueConverter.asInteger),
 
     // Rotation
-    Rotation("Rotation"),
-    RotationAnchorX("Rotation X Anchor"),
-    RotationAnchorY("Rotation Y Anchor"),
+    Rotation("Rotation", ValueConverter.asDegrees),
+    RotationAnchorX("Rotation X Anchor", ValueConverter.asInteger),
+    RotationAnchorY("Rotation Y Anchor", ValueConverter.asInteger),
 
     // Color
-    Red("Red"), Green("Green"), Blue("Blue"), OpacityMultiplier("Opacity Multiplier"),
+    Red("Red", ValueConverter.as8bitColor),
+    Green("Green", ValueConverter.as8bitColor),
+    Blue("Blue", ValueConverter.as8bitColor),
+    OpacityMultiplier("Opacity Multiplier", ValueConverter.asDecimal(2)),
 }
