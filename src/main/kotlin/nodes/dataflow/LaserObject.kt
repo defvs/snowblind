@@ -33,5 +33,4 @@ data class Color(
 
 abstract class LaserObject(val points: List<Point>)
 class LaserPoint(point: Point, val color: Color) : LaserObject(points = listOf(point))
-class LaserLine(points: List<Point>) : LaserObject(points)
-class LaserPolygon(points: List<Point>) : LaserObject(points)
+class LaserPolygon(points: List<Point>, closed: Boolean) : LaserObject(points) // todo colors
