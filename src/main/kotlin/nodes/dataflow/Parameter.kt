@@ -10,6 +10,7 @@ data class NodeParameterData(
 )
 
 fun Map<ParameterType, NodeParameterData>.getValue(key: ParameterType) = this[key]!!.data
+fun Map<ParameterType, NodeParameterData>.getReadableValue(key: ParameterType) = key.valueConverter(this.getValue(key))
 
 private object ValueConverter {
     val asInteger: (Double) -> String = { it.roundToInt().toString() }
@@ -19,9 +20,9 @@ private object ValueConverter {
 }
 
 enum class ParameterType(
-    readableName: String,
-    valueConverter: (Double) -> String,
-) { // TODO: add human-printable value lambda to each
+    val readableName: String,
+    val valueConverter: (Double) -> String,
+) {
     // Base positions
     BasePosX("X Position", ValueConverter.asInteger),
     BasePosY("Y Position", ValueConverter.asInteger),
@@ -40,4 +41,6 @@ enum class ParameterType(
     Green("Green", ValueConverter.as8bitColor),
     Blue("Blue", ValueConverter.as8bitColor),
     OpacityMultiplier("Opacity Multiplier", ValueConverter.asDecimal(2)),
+
+    ;
 }
