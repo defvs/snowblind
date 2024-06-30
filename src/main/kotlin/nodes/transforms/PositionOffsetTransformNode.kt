@@ -1,7 +1,10 @@
 package nodes.transforms
 
-import nodes.dataflow.*
-import java.util.*
+import laser.LaserObject
+import nodes.NodeBase
+import nodes.NodeParameterData
+import nodes.ParameterType
+import nodes.getValue
 
 class PositionOffsetTransformNode : NodeBase(
     name = "Position Offset",
@@ -17,7 +20,7 @@ class PositionOffsetTransformNode : NodeBase(
         ParameterType.RotationAnchorY to NodeParameterData(),
     )
 
-    override fun process(inputs: List<DataFlow>): DataFlow {
+    override fun process(inputs: List<List<LaserObject>>): List<LaserObject> {
         if (inputs.isEmpty()) return listOf()
         return inputs.flatten().onEach { laserObject ->
             laserObject.points.onEach {

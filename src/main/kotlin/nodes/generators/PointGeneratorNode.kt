@@ -1,7 +1,14 @@
 package nodes.generators
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import nodes.dataflow.*
+import laser.Color
+import laser.LaserObject
+import laser.LaserPoint
+import laser.Point
+import nodes.NodeBase
+import nodes.NodeParameterData
+import nodes.ParameterType
+import nodes.getValue
 
 private val logger = KotlinLogging.logger {}
 
@@ -20,7 +27,7 @@ class PointGeneratorNode : NodeBase(
         ParameterType.OpacityMultiplier to NodeParameterData(),
     )
 
-    override fun process(inputs: List<DataFlow>): DataFlow {
+    override fun process(inputs: List<List<LaserObject>>): List<LaserObject> {
         if (inputs.isNotEmpty()) logger.warn { "Input isn't empty in a Generator Node." }
         return listOf(
             LaserPoint(

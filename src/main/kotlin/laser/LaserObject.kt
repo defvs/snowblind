@@ -1,4 +1,4 @@
-package nodes.dataflow
+package laser
 
 import kotlin.math.cos
 import kotlin.math.sin
@@ -32,5 +32,5 @@ data class Color(
 )
 
 abstract class LaserObject(val points: List<Point>)
-class LaserPoint(point: Point, val color: Color) : LaserObject(points = listOf(point))
+class LaserPoint(val point: Point, val color: Color) : LaserObject(points = listOf(point))
 class LaserPolygon(points: List<Point>, closed: Boolean) : LaserObject(points) // todo colors

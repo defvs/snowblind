@@ -1,8 +1,8 @@
-package nodes.dataflow
+package nodes
 
 import kotlin.math.roundToInt
 
-typealias Parameter = Pair<ParameterType, Double>
+typealias NodeParameter = Pair<ParameterType, Double>
 
 data class NodeParameterData(
     var data: Double = 0.0,
@@ -11,13 +11,6 @@ data class NodeParameterData(
 
 fun Map<ParameterType, NodeParameterData>.getValue(key: ParameterType) = this[key]!!.data
 fun Map<ParameterType, NodeParameterData>.getReadableValue(key: ParameterType) = key.valueConverter(this.getValue(key))
-
-private object ValueConverter {
-    val asInteger: (Double) -> String = { it.roundToInt().toString() }
-    fun asDecimal(digits: Int): (Double) -> String = { String.format("%.${digits}d", it) }
-    val asDegrees: (Double) -> String = { it.times(360).roundToInt().toString() }
-    val as8bitColor: (Double) -> String = { it.times(256).roundToInt().toString() }
-}
 
 enum class ParameterType(
     val readableName: String,
@@ -41,6 +34,12 @@ enum class ParameterType(
     Green("Green", ValueConverter.as8bitColor),
     Blue("Blue", ValueConverter.as8bitColor),
     OpacityMultiplier("Opacity Multiplier", ValueConverter.asDecimal(2)),
-
     ;
+
+    private object ValueConverter {
+        val asInteger: (Double) -> String = { it.roundToInt().toString() }
+        fun asDecimal(digits: Int): (Double) -> String = { String.format("%.${digits}d", it) }
+        val asDegrees: (Double) -> String = { it.times(360).roundToInt().toString() }
+        val as8bitColor: (Double) -> String = { it.times(256).roundToInt().toString() }
+    }
 }
