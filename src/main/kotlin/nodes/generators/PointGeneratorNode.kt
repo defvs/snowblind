@@ -2,11 +2,15 @@ package nodes.generators
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import nodes.dataflow.*
-import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-class PointGeneratorNode(uuid: UUID, name: String) : NodeBase(uuid, name) {
+class PointGeneratorNode : NodeBase(
+    name = "Point Generator",
+    description = """
+        Generates a single point
+    """.trimIndent()
+) {
     override val params = hashMapOf(
         ParameterType.BasePosX to NodeParameterData(),
         ParameterType.BasePosY to NodeParameterData(),

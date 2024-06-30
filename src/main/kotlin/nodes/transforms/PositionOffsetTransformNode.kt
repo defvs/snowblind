@@ -3,7 +3,12 @@ package nodes.transforms
 import nodes.dataflow.*
 import java.util.*
 
-class PositionOffsetTransformNode(uuid: UUID, name: String) : NodeBase(uuid, name) {
+class PositionOffsetTransformNode : NodeBase(
+    name = "Position Offset",
+    description = """
+        Offsets and/or Rotates the input.
+    """.trimIndent()
+) {
     override val params = hashMapOf(
         ParameterType.OffsetX to NodeParameterData(),
         ParameterType.OffsetY to NodeParameterData(),
