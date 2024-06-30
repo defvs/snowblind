@@ -5,14 +5,14 @@ import laser.Color
 import laser.LaserObject
 import laser.LaserPoint
 import laser.Point
-import nodes.NodeBase
+import nodes.GeneratorNode
 import nodes.NodeParameterData
 import nodes.ParameterType
 import nodes.getValue
 
 private val logger = KotlinLogging.logger {}
 
-class PointGeneratorNode : NodeBase(
+class PointGeneratorNode : GeneratorNode(
     name = "Point Generator",
     description = """
         Generates a single point

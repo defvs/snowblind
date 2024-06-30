@@ -19,3 +19,6 @@ abstract class NodeBase(
 
     abstract fun process(inputs: List<List<LaserObject>>): List<LaserObject>
 }
+
+abstract class GeneratorNode(name: String, description: String? = null) : NodeBase(name, description)
+abstract class TransformNode(name: String, description: String? = null) : NodeBase(name, description)

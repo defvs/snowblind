@@ -1,12 +1,12 @@
 package nodes.transforms
 
 import laser.LaserObject
-import nodes.NodeBase
 import nodes.NodeParameterData
 import nodes.ParameterType
+import nodes.TransformNode
 import nodes.getValue
 
-class PositionOffsetTransformNode : NodeBase(
+class PositionOffsetTransformNode : TransformNode(
     name = "Position Offset",
     description = """
         Offsets and/or Rotates the input.
