@@ -1,16 +1,32 @@
 package nodes
 
+import java.util.*
 import kotlin.math.roundToInt
 
-typealias NodeParameter = Pair<ParameterType, Double>
-
-data class NodeParameterData(
+data class NodeParameter(
+    val type: ParameterType,
     var data: Double = 0.0,
     val isExposed: Boolean = true,
+    val uuid: UUID = UUID.randomUUID(),
 )
 
-fun Map<ParameterType, NodeParameterData>.getValue(key: ParameterType) = this[key]!!.data
-fun Map<ParameterType, NodeParameterData>.getReadableValue(key: ParameterType) = key.valueConverter(this.getValue(key))
+class NodeParameterMap(vararg params: NodeParameter) {
+    private val mapByUUID = params.associateBy { it.uuid }
+    private val mapByType = params.associateBy { it.type }
+
+    operator fun get(uuid: UUID) = mapByUUID[uuid]
+    operator fun get(type: ParameterType) = mapByType[type]
+
+    fun getValue(uuid: UUID) = mapByUUID[uuid]!!.data
+    fun getValue(type: ParameterType) = mapByType[type]!!.data
+
+    operator fun set(uuid: UUID, data: Double) {
+        mapByUUID[uuid]?.data = data
+    }
+    operator fun set(type: ParameterType, data: Double) {
+        mapByType[type]?.data = data
+    }
+}
 
 enum class ParameterType(
     val readableName: String,

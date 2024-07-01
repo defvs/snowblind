@@ -1,37 +1,34 @@
 package nodes.transforms
 
 import laser.LaserObject
-import nodes.NodeParameterData
-import nodes.ParameterType
-import nodes.TransformNode
-import nodes.getValue
+import nodes.*
 
 class PositionOffsetTransformNode : TransformNode(
     name = "Position Offset",
     description = """
         Offsets and/or Rotates the input.
     """.trimIndent()
-) {
-    override val params = hashMapOf(
-        ParameterType.OffsetX to NodeParameterData(),
-        ParameterType.OffsetY to NodeParameterData(),
-        ParameterType.Rotation to NodeParameterData(),
-        ParameterType.RotationAnchorX to NodeParameterData(),
-        ParameterType.RotationAnchorY to NodeParameterData(),
+), INodeHasInputParams {
+    override val inputParams = NodeParameterMap(
+        NodeParameter(ParameterType.OffsetX),
+        NodeParameter(ParameterType.OffsetY),
+        NodeParameter(ParameterType.Rotation),
+        NodeParameter(ParameterType.RotationAnchorX),
+        NodeParameter(ParameterType.RotationAnchorY),
     )
 
-    override fun process(inputs: List<List<LaserObject>>): List<LaserObject> {
-        if (inputs.isEmpty()) return listOf()
-        return inputs.flatten().onEach { laserObject ->
+    override fun processLaser(input: List<LaserObject>): List<LaserObject> {
+        if (input.isEmpty()) return listOf()
+        return input.onEach { laserObject ->
             laserObject.points.onEach {
                 it.offset(
-                    params.getValue(ParameterType.OffsetX),
-                    params.getValue(ParameterType.OffsetY),
+                    inputParams.getValue(ParameterType.OffsetX),
+                    inputParams.getValue(ParameterType.OffsetY),
                 )
                 it.rotate(
-                    params.getValue(ParameterType.Rotation),
-                    params.getValue(ParameterType.RotationAnchorX),
-                    params.getValue(ParameterType.RotationAnchorY),
+                    inputParams.getValue(ParameterType.Rotation),
+                    inputParams.getValue(ParameterType.RotationAnchorX),
+                    inputParams.getValue(ParameterType.RotationAnchorY),
                 )
             }
         }
