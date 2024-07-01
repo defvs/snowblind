@@ -5,6 +5,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
+tasks.wrapper {
+    gradleVersion = "8.8"
+    distributionType = Wrapper.DistributionType.ALL
+}
+
 group = "dev.defvs"
 version = "1.0-SNAPSHOT"
 
@@ -47,6 +52,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation(kotlin("reflect"))
 
     // Logging
     implementation("io.github.oshai", "kotlin-logging-jvm", "5.1.0")
@@ -107,5 +113,5 @@ application {
 
 javafx {
     version = "22.0.1"
-    modules = listOf("javafx.controls")
+    modules = listOf("javafx.controls", "javafx.fxml", "javafx.graphics")
 }
