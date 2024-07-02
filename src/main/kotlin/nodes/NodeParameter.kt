@@ -1,30 +1,38 @@
 package nodes
 
-import java.util.*
+import helpers.ConnectorUUID
 import kotlin.math.roundToInt
 
 data class NodeParameter(
     val type: ParameterType,
     var data: Double = 0.0,
     val isExposed: Boolean = true,
-    val uuid: UUID = UUID.randomUUID(),
+    val uuid: ConnectorUUID = ConnectorUUID(),
 )
 
-class NodeParameterMap(vararg params: NodeParameter) {
+class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
     private val mapByUUID = params.associateBy { it.uuid }
     private val mapByType = params.associateBy { it.type }
 
-    operator fun get(uuid: UUID) = mapByUUID[uuid]
+    val parameters: Collection<NodeParameter>
+        get() = mapByUUID.values
+
+    operator fun get(uuid: ConnectorUUID) = mapByUUID[uuid]
     operator fun get(type: ParameterType) = mapByType[type]
 
-    fun getValue(uuid: UUID) = mapByUUID[uuid]!!.data
+    fun getValue(uuid: ConnectorUUID) = mapByUUID[uuid]!!.data
     fun getValue(type: ParameterType) = mapByType[type]!!.data
 
-    operator fun set(uuid: UUID, data: Double) {
+    operator fun set(uuid: ConnectorUUID, data: Double) {
         mapByUUID[uuid]?.data = data
     }
+
     operator fun set(type: ParameterType, data: Double) {
         mapByType[type]?.data = data
+    }
+
+    override fun iterator(): Iterator<NodeParameter> {
+        return mapByUUID.values.iterator()
     }
 }
 
@@ -32,6 +40,9 @@ enum class ParameterType(
     val readableName: String,
     val valueConverter: (Double) -> String,
 ) {
+    // Macro / Others
+    Generic("Generic", ValueConverter.asInteger),
+
     // Base positions
     BasePosX("X Position", ValueConverter.asInteger),
     BasePosY("Y Position", ValueConverter.asInteger),

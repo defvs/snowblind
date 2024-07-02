@@ -1,8 +1,8 @@
 package nodes
 
-import java.util.*
+import helpers.ConnectorUUID
+import helpers.NodeUUID
 
-sealed class NodeConnection(val source: UUID, val dest: UUID) {
-    class LaserConnection(source: UUID, dest: UUID) : NodeConnection(source, dest)
-    class ParameterConnection(source: UUID, dest: UUID) : NodeConnection(source, dest)
-}
+data class NodeConnectionUUID(val nodeUUID: NodeUUID, val connectorUUID: ConnectorUUID)
+
+data class NodeConnection(val source: NodeConnectionUUID, val dest: NodeConnectionUUID)

@@ -1,12 +1,13 @@
 package nodes
 
+import helpers.ConnectorUUID
+import helpers.NodeUUID
 import laser.LaserObject
-import java.util.*
 
 abstract class Node(
     val name: String,
     val description: String? = null,
-    val uuid: UUID = UUID.randomUUID(),
+    val uuid: NodeUUID = NodeUUID(),
 )
 
 interface INodeHasInputParams {
@@ -17,20 +18,28 @@ interface INodeHasOutputParams {
     val outputParams: NodeParameterMap
 }
 
+interface INodeHasInputLaser {
+    val laserInputUUID: ConnectorUUID
+}
+
+interface INodeHasOutputLaser {
+    val laserOutputUUID: ConnectorUUID
+}
+
 abstract class GeneratorNode(
     name: String,
     description: String? = null,
-    val laserOutputUUID: UUID = UUID.randomUUID(),
-) : Node(name, description) {
+    override val laserOutputUUID: ConnectorUUID = ConnectorUUID()
+) : Node(name, description), INodeHasOutputLaser {
     abstract val laserOutput: List<LaserObject>
 }
 
 abstract class TransformNode(
     name: String,
     description: String? = null,
-    val laserInputUUID: UUID = UUID.randomUUID(),
-    val laserOutputUUID: UUID = UUID.randomUUID(),
-) : Node(name, description) {
+    override val laserInputUUID: ConnectorUUID = ConnectorUUID(),
+    override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
+) : Node(name, description), INodeHasInputLaser, INodeHasOutputLaser {
     abstract fun processLaser(input: List<LaserObject>): List<LaserObject>
 }
 

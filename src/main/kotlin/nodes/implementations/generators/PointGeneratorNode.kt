@@ -1,4 +1,4 @@
-package nodes.generators
+package nodes.implementations.generators
 
 import laser.Color
 import laser.LaserObject
