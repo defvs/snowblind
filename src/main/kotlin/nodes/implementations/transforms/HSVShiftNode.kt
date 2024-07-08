@@ -16,11 +16,9 @@ class HSVShiftNode : TransformNode(
 
     override fun processLaser(input: List<LaserObject>): List<LaserObject> {
         return input.onEach { laserObject ->
-            laserObject.laserPoints.onEach {
-                it.colors.forEach { color ->
-                    color.hue = (color.hue + inputParams[ParameterType.HueShift]!!.data).mod(1.0)
-                    color.saturation = (color.saturation + inputParams[ParameterType.SaturationShift]!!.data).mod(1.0)
-                }
+            laserObject.applyColorTransform {
+                hue = (hue + inputParams[ParameterType.HueShift]!!.data).mod(1.0)
+                saturation = (saturation + inputParams[ParameterType.SaturationShift]!!.data).mod(1.0)
             }
         }
     }

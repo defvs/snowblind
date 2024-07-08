@@ -19,12 +19,12 @@ class PositionOffsetTransformNode : TransformNode(
 
     override fun processLaser(input: List<LaserObject>): List<LaserObject> {
         return input.onEach { laserObject ->
-            laserObject.points.onEach {
-                it.offset(
+            laserObject.applyPositionTransform {
+                offset(
                     inputParams.getValue(ParameterType.OffsetX),
                     inputParams.getValue(ParameterType.OffsetY),
                 )
-                it.rotate(
+                rotate(
                     inputParams.getValue(ParameterType.Rotation),
                     inputParams.getValue(ParameterType.RotationAnchorX),
                     inputParams.getValue(ParameterType.RotationAnchorY),
