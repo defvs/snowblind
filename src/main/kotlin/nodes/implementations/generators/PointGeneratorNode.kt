@@ -2,7 +2,6 @@ package nodes.implementations.generators
 
 import laser.Color
 import laser.LaserObject
-import laser.LaserPoint
 import laser.Point
 import nodes.*
 
@@ -23,7 +22,7 @@ class PointGeneratorNode : GeneratorNode(
 
     override val laserOutput: List<LaserObject>
         get() = listOf(
-            LaserPoint(
+            LaserObject(
                 Point(
                     inputParams.getValue(ParameterType.BasePosX),
                     inputParams.getValue(ParameterType.BasePosY),

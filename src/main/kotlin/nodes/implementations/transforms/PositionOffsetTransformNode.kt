@@ -18,7 +18,6 @@ class PositionOffsetTransformNode : TransformNode(
     )
 
     override fun processLaser(input: List<LaserObject>): List<LaserObject> {
-        if (input.isEmpty()) return listOf()
         return input.onEach { laserObject ->
             laserObject.points.onEach {
                 it.offset(
