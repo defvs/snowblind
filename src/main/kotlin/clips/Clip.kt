@@ -81,15 +81,15 @@ abstract class Clip(val uuid: ClipUUID = ClipUUID()) {
 }
 
 class GeneratorClip : Clip() {
-    public override fun process(): List<LaserObject> {
-        return super.process()
-    }
+    public override fun process() = super.process()
 }
+
 class EffectClip : Clip() {
     fun process(input: List<LaserObject>): List<LaserObject> {
-        super.nodes.values.filterIsInstance<InputNode>().onEach {
-            it.laserOutput = input
-        }
+        super.nodes.values.filterIsInstance<InputNode>()
+            .ifEmpty { return emptyList() }.onEach {
+                it.laserOutput = input
+            }
         return super.process()
     }
 }
