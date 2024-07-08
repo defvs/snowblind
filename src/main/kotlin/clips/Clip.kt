@@ -8,7 +8,7 @@ import nodes.implementations.special.InputNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
 
-abstract class Clip(val uuid: ClipUUID = ClipUUID()) {
+abstract class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed Clip") {
     protected val nodes = hashMapOf<NodeUUID, Node>()
     private val connectionMap = NodeConnectionMap()
 
