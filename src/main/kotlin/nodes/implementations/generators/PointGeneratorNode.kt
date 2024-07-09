@@ -1,6 +1,6 @@
 package nodes.implementations.generators
 
-import laser.Color
+import com.github.ajalt.colormath.model.RGB
 import laser.LaserObject
 import laser.Point
 import nodes.*
@@ -17,7 +17,6 @@ class PointGeneratorNode : GeneratorNode(
         NodeParameter(ParameterType.Red),
         NodeParameter(ParameterType.Green),
         NodeParameter(ParameterType.Blue),
-        NodeParameter(ParameterType.OpacityMultiplier),
     )
 
     override val laserOutput: List<LaserObject>
@@ -26,11 +25,10 @@ class PointGeneratorNode : GeneratorNode(
                 Point(
                     inputParams.getValue(ParameterType.BasePosX),
                     inputParams.getValue(ParameterType.BasePosY),
-                ), Color(
+                ), RGB(
                     inputParams.getValue(ParameterType.Red),
                     inputParams.getValue(ParameterType.Green),
                     inputParams.getValue(ParameterType.Blue),
-                    inputParams.getValue(ParameterType.OpacityMultiplier),
                 )
             )
         )

@@ -60,6 +60,8 @@ dependencies {
     // IPC
     implementation("org.zeromq:jeromq:0.5.2")
 
+    implementation("com.github.ajalt.colormath:colormath:3.6.0")
+
     //////////////
     // Graphics //
     //////////////

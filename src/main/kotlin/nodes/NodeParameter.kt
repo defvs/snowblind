@@ -2,7 +2,6 @@ package nodes
 
 import helpers.ConnectorUUID
 import kotlin.math.roundToInt
-import kotlin.time.times
 
 data class NodeParameter(
     val type: ParameterType,
@@ -57,13 +56,13 @@ enum class ParameterType(
     RotationAnchorX("Rotation X Anchor", ValueConverter.asInteger),
     RotationAnchorY("Rotation Y Anchor", ValueConverter.asInteger),
 
-    // Color
+    // Color (RGB & HSL)
     Red("Red", ValueConverter.as8bitColor),
     Green("Green", ValueConverter.as8bitColor),
     Blue("Blue", ValueConverter.as8bitColor),
     HueShift("Hue Shift", ValueConverter.as8bitColor),
     SaturationShift("Saturation Shift", ValueConverter.as8bitColor),
-    OpacityMultiplier("Opacity Multiplier", ValueConverter.asDecimal(2)),
+    LightnessShift("Lightness Shift", ValueConverter.as8bitColor),
     ;
 
     private object ValueConverter {
