@@ -1,15 +1,24 @@
 package nodes
 
 import helpers.ConnectorUUID
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Required
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlin.math.roundToInt
 
+@Serializable
 data class NodeParameter(
     val type: ParameterType,
     var data: Double = 0.0,
-    val isExposed: Boolean = true,
-    val uuid: ConnectorUUID = ConnectorUUID(),
+    @Required val isExposed: Boolean = true,
+    @Required val uuid: ConnectorUUID = ConnectorUUID(),
 )
 
+@Serializable(with = NodeParameterMapSerializer::class)
 class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
     private val mapByUUID = params.associateBy { it.uuid }
     private val mapByType = params.associateBy { it.type }
@@ -36,6 +45,22 @@ class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
     }
 }
 
+class NodeParameterMapSerializer : KSerializer<NodeParameterMap> {
+    @OptIn(ExperimentalSerializationApi::class)
+    private val delegateSerializer = ArraySerializer(NodeParameter.serializer())
+    override val descriptor = delegateSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): NodeParameterMap {
+        return NodeParameterMap(*decoder.decodeSerializableValue(delegateSerializer))
+    }
+
+    override fun serialize(encoder: Encoder, value: NodeParameterMap) {
+        encoder.encodeSerializableValue(delegateSerializer, value.parameters.toTypedArray())
+    }
+
+}
+
+@Serializable
 enum class ParameterType(
     val readableName: String,
     val valueConverter: (Double) -> String,

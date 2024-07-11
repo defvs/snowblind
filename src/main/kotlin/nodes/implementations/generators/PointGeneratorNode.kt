@@ -1,10 +1,12 @@
 package nodes.implementations.generators
 
 import com.github.ajalt.colormath.model.RGB
+import kotlinx.serialization.Serializable
 import laser.LaserObject
 import laser.Point
 import nodes.*
 
+@Serializable
 class PointGeneratorNode : GeneratorNode(
     name = "Point Generator",
     description = """

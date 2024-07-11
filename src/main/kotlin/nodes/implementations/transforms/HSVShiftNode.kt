@@ -1,9 +1,11 @@
 package nodes.implementations.transforms
 
 import com.github.ajalt.colormath.model.HSL
+import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.*
 
+@Serializable
 class HSVShiftNode : TransformNode(
     name = "HSV Shift",
     description = """

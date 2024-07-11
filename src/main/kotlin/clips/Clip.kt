@@ -2,18 +2,21 @@ package clips
 
 import helpers.ClipUUID
 import helpers.NodeUUID
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import laser.LaserObject
 import nodes.*
 import nodes.implementations.special.InputNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
 
-abstract class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed Clip") {
-    protected val nodes = hashMapOf<NodeUUID, Node>()
-    private val connectionMap = NodeConnectionMap()
+@Serializable
+sealed class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed Clip") {
+    val nodes = hashMapOf<NodeUUID, Node>()
+    val connectionMap = NodeConnectionMap()
 
-    private val laserObjectCache = hashMapOf<NodeUUID, List<LaserObject>>()
-    private val processedParamsCache = hashSetOf<NodeUUID>()
+    @Transient private val laserObjectCache = hashMapOf<NodeUUID, List<LaserObject>>()
+    @Transient private val processedParamsCache = hashSetOf<NodeUUID>()
 
     operator fun plusAssign(node: Node) {
         nodes[node.uuid] = node
@@ -80,10 +83,12 @@ abstract class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed
     }
 }
 
+@Serializable
 class GeneratorClip : Clip() {
     public override fun process() = super.process()
 }
 
+@Serializable
 class EffectClip : Clip() {
     fun process(input: List<LaserObject>): List<LaserObject> {
         super.nodes.values.filterIsInstance<InputNode>()

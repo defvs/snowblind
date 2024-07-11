@@ -1,8 +1,10 @@
 package nodes.implementations.transforms
 
+import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.*
 
+@Serializable
 class PositionOffsetTransformNode : TransformNode(
     name = "Position Offset",
     description = """

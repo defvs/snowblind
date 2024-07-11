@@ -1,12 +1,16 @@
 package helpers
 
+import kotlinx.serialization.Serializable
 import java.util.*
 
+@Serializable
 @JvmInline
-value class NodeUUID(val uuid: UUID = UUID.randomUUID())
+value class NodeUUID(@Serializable(with = UUIDSerializer::class) val uuid: UUID = UUID.randomUUID())
 
+@Serializable
 @JvmInline
-value class ConnectorUUID(val uuid: UUID = UUID.randomUUID())
+value class ConnectorUUID(@Serializable(with = UUIDSerializer::class) val uuid: UUID = UUID.randomUUID())
 
+@Serializable
 @JvmInline
-value class ClipUUID(val uuid: UUID = UUID.randomUUID())
+value class ClipUUID(@Serializable(with = UUIDSerializer::class) val uuid: UUID = UUID.randomUUID())
