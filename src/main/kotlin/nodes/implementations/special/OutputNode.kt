@@ -5,10 +5,10 @@ import helpers.NodeUUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import nodes.INodeHasInputLaser
-import nodes.Node
+import nodes.INodeBase
 
 @Serializable
-class OutputNode : Node, INodeHasInputLaser {
+class OutputNode : INodeBase, INodeHasInputLaser {
     @Transient
     override val name = "Laser Output"
     @Transient

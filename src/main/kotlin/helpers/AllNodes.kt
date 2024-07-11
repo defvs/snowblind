@@ -1,7 +1,5 @@
-package nodes
+package helpers
 
-import helpers.OnlyFXClipNode
-import helpers.OnlyFullClipNode
 import nodes.implementations.generators.*
 import nodes.implementations.special.*
 import nodes.implementations.transforms.*

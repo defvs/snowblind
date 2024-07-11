@@ -14,7 +14,7 @@ import nodes.implementations.special.OutputNode
 sealed class Clip {
     abstract val name: String
     abstract val uuid: ClipUUID
-    val nodes = hashMapOf<NodeUUID, Node>()
+    val nodes = hashMapOf<NodeUUID, INodeBase>()
     val connectionMap = NodeConnectionMap()
 
     @Transient
@@ -22,7 +22,7 @@ sealed class Clip {
     @Transient
     private val processedParamsCache = hashSetOf<NodeUUID>()
 
-    operator fun plusAssign(node: Node) {
+    operator fun plusAssign(node: INodeBase) {
         nodes[node.uuid] = node
     }
 
@@ -30,7 +30,7 @@ sealed class Clip {
         connectionMap.addConnection(connection)
     }
 
-    private fun processParameters(node: Node) {
+    private fun processParameters(node: INodeBase) {
         if (node !is INodeHasInputParams || processedParamsCache.contains(node.uuid)) return
         node.inputParams.forEach { param ->
             val sourceNode = connectionMap
@@ -47,7 +47,7 @@ sealed class Clip {
         }
     }
 
-    private fun processNode(node: Node): List<LaserObject> {
+    private fun processNode(node: INodeBase): List<LaserObject> {
         laserObjectCache[node.uuid]?.let { return it }
         processParameters(node)
         return when (node) {

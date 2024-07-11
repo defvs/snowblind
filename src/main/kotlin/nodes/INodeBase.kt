@@ -4,29 +4,9 @@ import helpers.ConnectorUUID
 import helpers.NodeUUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import laser.LaserObject
-import nodes.implementations.generators.PointGeneratorNode
-import nodes.implementations.special.InputNode
-import nodes.implementations.special.MacroNode
-import nodes.implementations.special.OutputNode
-import nodes.implementations.transforms.HSVShiftNode
-import nodes.implementations.transforms.PositionOffsetTransformNode
 
-val nodeSerializerModule = SerializersModule {
-    polymorphic(Node::class) {
-        subclass(PointGeneratorNode::class)
-        subclass(InputNode::class)
-        subclass(MacroNode::class)
-        subclass(OutputNode::class)
-        subclass(HSVShiftNode::class)
-        subclass(PositionOffsetTransformNode::class)
-    }
-}
-
-interface Node {
+interface INodeBase {
     @Transient
     val name: String
     @Transient
@@ -56,7 +36,7 @@ abstract class GeneratorNode(
     override val name: String,
     override val description: String? = null,
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID()
-) : Node, INodeHasOutputLaser {
+) : INodeBase, INodeHasOutputLaser {
     abstract val laserOutput: List<LaserObject>
 }
 
@@ -67,7 +47,7 @@ abstract class TransformNode(
     override val description: String? = null,
     override val laserInputUUID: ConnectorUUID = ConnectorUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
-) : Node, INodeHasInputLaser, INodeHasOutputLaser {
+) : INodeBase, INodeHasInputLaser, INodeHasOutputLaser {
     abstract fun processLaser(input: List<LaserObject>): List<LaserObject>
 }
 
@@ -76,6 +56,6 @@ abstract class ParameterTransformNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val name: String,
     override val description: String? = null
-) : Node, INodeHasInputParams, INodeHasOutputParams {
+) : INodeBase, INodeHasInputParams, INodeHasOutputParams {
     abstract fun processParameter()
 }

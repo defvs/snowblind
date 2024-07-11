@@ -1,5 +1,6 @@
 package helpers
 
+import helpers.serialization.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*
 

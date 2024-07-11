@@ -6,7 +6,7 @@ import kotlinx.serialization.Transient
 import nodes.*
 
 @Serializable
-class MacroNode : Node, INodeHasOutputParams {
+class MacroNode : INodeBase, INodeHasOutputParams {
     @Transient override val name = "Macro Node"
     @Transient override val description = """
         Parameter Input from your DAW.

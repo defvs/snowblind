@@ -1,4 +1,4 @@
-package helpers
+package helpers.serialization
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
