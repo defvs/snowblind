@@ -1,6 +1,7 @@
 package helpers.serialization
 
 import clips.*
+import helpers.ClipRackUUID
 import helpers.ClipUUID
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -11,17 +12,20 @@ class ClipRackUUIDOnlySerializer : KSerializer<ClipRack> {
     @Serializable
     private class ClipRackDelegate(
         val name: String,
+        val uuid: ClipRackUUID,
         val generatorClipsUUID: Array<ClipUUID?>,
         val effectClipsUUID: Array<ClipUUID?>,
     ) {
         fun toClipRack(clipDatabase: Map<ClipUUID, Clip>) = ClipRack(
             name,
+            uuid,
             generatorClipsUUID.map { clipDatabase[it] as? GeneratorClip }.toTypedArray(),
             effectClipsUUID.map { clipDatabase[it] as? EffectClip }.toTypedArray(),
         )
 
         constructor(clipRack: ClipRack) : this(
             clipRack.name,
+            clipRack.uuid,
             clipRack.generatorClips.map { it?.uuid }.toTypedArray(),
             clipRack.effectClips.map { it?.uuid }.toTypedArray()
         )

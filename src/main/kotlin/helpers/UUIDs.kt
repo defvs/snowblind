@@ -15,3 +15,7 @@ value class ConnectorUUID(@Serializable(with = UUIDSerializer::class) val uuid: 
 @Serializable
 @JvmInline
 value class ClipUUID(@Serializable(with = UUIDSerializer::class) val uuid: UUID = UUID.randomUUID())
+
+@Serializable
+@JvmInline
+value class ClipRackUUID(@Serializable(with = UUIDSerializer::class) val uuid: UUID = UUID.randomUUID())
