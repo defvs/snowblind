@@ -6,6 +6,9 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import laser.LaserObject
 
+/**
+ * Base interface for all nodes.
+ */
 interface INodeBase {
     @Transient
     val name: String
@@ -14,22 +17,37 @@ interface INodeBase {
     val uuid: NodeUUID
 }
 
+/**
+ * Interface for nodes with input parameters.
+ */
 interface INodeHasInputParams {
     val inputParams: NodeParameterMap
 }
 
+/**
+ * Interface for nodes with output parameters.
+ */
 interface INodeHasOutputParams {
     val outputParams: NodeParameterMap
 }
 
+/**
+ * Interface for nodes with laser input.
+ */
 interface INodeHasInputLaser {
     val laserInputUUID: ConnectorUUID
 }
 
+/**
+ * Interface for nodes with laser output.
+ */
 interface INodeHasOutputLaser {
     val laserOutputUUID: ConnectorUUID
 }
 
+/**
+ * Abstract class representing a generator node.
+ */
 @Serializable
 abstract class GeneratorNode(
     override val uuid: NodeUUID = NodeUUID(),
@@ -40,6 +58,9 @@ abstract class GeneratorNode(
     abstract val laserOutput: List<LaserObject>
 }
 
+/**
+ * Abstract class representing a transform node.
+ */
 @Serializable
 abstract class TransformNode(
     override val uuid: NodeUUID = NodeUUID(),
@@ -51,6 +72,9 @@ abstract class TransformNode(
     abstract fun processLaser(input: List<LaserObject>): List<LaserObject>
 }
 
+/**
+ * Abstract class representing a parameter transform node.
+ */
 @Serializable
 abstract class ParameterTransformNode(
     override val uuid: NodeUUID = NodeUUID(),

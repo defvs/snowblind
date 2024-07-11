@@ -1,11 +1,14 @@
 package nodes
 
 import helpers.ConnectorUUID
+import helpers.serialization.NodeParameterMapSerializer
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
-import helpers.serialization.NodeParameterMapSerializer
 import kotlin.math.roundToInt
 
+/**
+ * Data class representing a node parameter with a UUID and associated data.
+ */
 @Serializable
 data class NodeParameter(
     val type: ParameterType,
@@ -14,10 +17,13 @@ data class NodeParameter(
     @Required val uuid: ConnectorUUID = ConnectorUUID(),
 )
 
+/**
+ * Class representing a map of node parameters.
+ */
 @Serializable(with = NodeParameterMapSerializer::class)
-class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
-    private val mapByUUID = params.associateBy { it.uuid }
-    private val mapByType = params.associateBy { it.type }
+class NodeParameterMap(vararg parameters: NodeParameter) : Iterable<NodeParameter> {
+    private val mapByUUID = parameters.associateBy { it.uuid }
+    private val mapByType = parameters.associateBy { it.type }
 
     val parameters: Collection<NodeParameter>
         get() = mapByUUID.values
@@ -41,6 +47,12 @@ class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
     }
 }
 
+/**
+ * Enum class representing types of parameters with associated readable names and value converters.
+ *
+ * @property readableName The human-readable name of the parameter type.
+ * @property valueConverter Function to convert the parameter value to a readable string.
+ */
 @Serializable
 enum class ParameterType(
     val readableName: String,

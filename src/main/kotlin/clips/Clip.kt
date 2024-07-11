@@ -10,22 +10,51 @@ import nodes.implementations.special.InputNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
 
+/**
+ * Base sealed class representing a clip.
+ */
 @Serializable
 sealed class Clip {
+    /**
+     * Name of the clip.
+     */
     abstract val name: String
+
+    /**
+     * Unique identifier for the clip.
+     */
     abstract val uuid: ClipUUID
+
+    /**
+     * Map of nodes associated with the clip.
+     */
     val nodes = hashMapOf<NodeUUID, INodeBase>()
+
+    /**
+     * Map of connections between nodes.
+     */
     val connectionMap = NodeConnectionMap()
 
     @Transient
     private val laserObjectCache = hashMapOf<NodeUUID, List<LaserObject>>()
+
     @Transient
     private val processedParamsCache = hashSetOf<NodeUUID>()
 
+    /**
+     * Adds a node to the clip.
+     *
+     * @param node The node to add.
+     */
     operator fun plusAssign(node: INodeBase) {
         nodes[node.uuid] = node
     }
 
+    /**
+     * Adds a connection to the clip.
+     *
+     * @param connection The connection to add.
+     */
     operator fun plusAssign(connection: NodeConnection) {
         connectionMap.addConnection(connection)
     }
@@ -55,19 +84,22 @@ sealed class Clip {
             is TransformNode -> {
                 val inputConnection = connectionMap.getConnectionByConnector(node.laserInputUUID)
                 val inputNode = inputConnection?.source?.nodeUUID?.let { nodes[it] }
-                val inputLaserObjects = inputNode?.let { processNode(it) } ?: emptyList()
-                node.processLaser(inputLaserObjects)
+                val inputLaser = inputNode?.let { processNode(it) } ?: emptyList()
+                node.processLaser(inputLaser)
             }
 
-
             else -> emptyList()
-        }.also { laserObjectCache[node.uuid] = it }
+        }.also {
+            laserObjectCache[node.uuid] = it
+        }
     }
 
-    protected open fun process(): List<LaserObject> {
-        laserObjectCache.clear()
-        processedParamsCache.clear()
-
+    /**
+     * Processes all nodes and returns the final output.
+     *
+     * @return List of processed laser objects.
+     */
+    open fun process(): List<LaserObject> {
         val outputNodes = nodes.values.filterIsInstance<OutputNode>().ifEmpty { return emptyList() }
 
         val laserObjects = mutableListOf<LaserObject>()
@@ -87,19 +119,29 @@ sealed class Clip {
     }
 }
 
+/**
+ * Class representing a generator clip.
+ */
 @Serializable
 class GeneratorClip(
     override val name: String = "Unnamed Generator Clip",
-    override val uuid: ClipUUID = ClipUUID()
-) : Clip() {
-    public override fun process() = super.process()
-}
+    override val uuid: ClipUUID = ClipUUID(),
+) : Clip()
 
+/**
+ * Class representing an effect clip.
+ */
 @Serializable
 class EffectClip(
     override val name: String = "Unnamed Generator Clip",
-    override val uuid: ClipUUID = ClipUUID()
+    override val uuid: ClipUUID = ClipUUID(),
 ) : Clip() {
+    /**
+     * Processes the effect clip with the provided input laser objects.
+     *
+     * @param input List of input laser objects.
+     * @return List of processed laser objects.
+     */
     fun process(input: List<LaserObject>): List<LaserObject> {
         super.nodes.values.filterIsInstance<InputNode>()
             .ifEmpty { return emptyList() }.onEach {
