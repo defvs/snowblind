@@ -11,12 +11,16 @@ import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
 
 @Serializable
-sealed class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed Clip") {
+sealed class Clip {
+    abstract val name: String
+    abstract val uuid: ClipUUID
     val nodes = hashMapOf<NodeUUID, Node>()
     val connectionMap = NodeConnectionMap()
 
-    @Transient private val laserObjectCache = hashMapOf<NodeUUID, List<LaserObject>>()
-    @Transient private val processedParamsCache = hashSetOf<NodeUUID>()
+    @Transient
+    private val laserObjectCache = hashMapOf<NodeUUID, List<LaserObject>>()
+    @Transient
+    private val processedParamsCache = hashSetOf<NodeUUID>()
 
     operator fun plusAssign(node: Node) {
         nodes[node.uuid] = node
@@ -84,12 +88,18 @@ sealed class Clip(val uuid: ClipUUID = ClipUUID(), val name: String = "Unnamed C
 }
 
 @Serializable
-class GeneratorClip : Clip() {
+class GeneratorClip(
+    override val name: String = "Unnamed Generator Clip",
+    override val uuid: ClipUUID = ClipUUID()
+) : Clip() {
     public override fun process() = super.process()
 }
 
 @Serializable
-class EffectClip : Clip() {
+class EffectClip(
+    override val name: String = "Unnamed Generator Clip",
+    override val uuid: ClipUUID = ClipUUID()
+) : Clip() {
     fun process(input: List<LaserObject>): List<LaserObject> {
         super.nodes.values.filterIsInstance<InputNode>()
             .ifEmpty { return emptyList() }.onEach {

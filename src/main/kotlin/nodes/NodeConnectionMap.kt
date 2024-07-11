@@ -28,6 +28,8 @@ class NodeConnectionMap(vararg connections: NodeConnection) {
         connectionsByConnector[connection.dest.connectorUUID] = connection
     }
 
+    operator fun plusAssign(connection: NodeConnection) = addConnection(connection)
+
     fun getConnectionsByNode(nodeUUID: NodeUUID): List<NodeConnection> {
         return connectionsByNode[nodeUUID] ?: emptyList()
     }
