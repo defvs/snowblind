@@ -13,7 +13,7 @@ import kotlin.math.roundToInt
 @Serializable
 data class NodeParameter(
     val type: ParameterType,
-    var data: Double = 0.0,
+    var data: Float = 0.0f,
     @Required val isExposed: Boolean = true,
     @Required val uuid: ConnectorUUID = ConnectorUUID(),
 )
@@ -32,11 +32,11 @@ class NodeParameterMap(vararg params: NodeParameter) : Iterable<NodeParameter> {
     fun getValue(uuid: ConnectorUUID) = mapByUUID[uuid]!!.data
     fun getValue(type: ParameterType) = mapByType[type]!!.data
 
-    operator fun set(uuid: ConnectorUUID, data: Double) {
+    operator fun set(uuid: ConnectorUUID, data: Float) {
         mapByUUID[uuid]?.data = data
     }
 
-    operator fun set(type: ParameterType, data: Double) {
+    operator fun set(type: ParameterType, data: Float) {
         mapByType[type]?.data = data
     }
 
@@ -63,7 +63,7 @@ class NodeParameterMapSerializer : KSerializer<NodeParameterMap> {
 @Serializable
 enum class ParameterType(
     val readableName: String,
-    val valueConverter: (Double) -> String,
+    val valueConverter: (Float) -> String,
 ) {
     // Macro / Others
     Generic("Generic", ValueConverter.asInteger),
@@ -91,9 +91,9 @@ enum class ParameterType(
     ;
 
     private object ValueConverter {
-        val asInteger: (Double) -> String = { it.roundToInt().toString() }
-        fun asDecimal(digits: Int): (Double) -> String = { String.format("%.${digits}d", it) }
-        val asDegrees: (Double) -> String = { it.times(360).roundToInt().toString() }
-        val as8bitColor: (Double) -> String = { it.times(256).roundToInt().toString() }
+        val asInteger: (Float) -> String = { it.roundToInt().toString() }
+        fun asDecimal(digits: Int): (Float) -> String = { String.format("%.${digits}d", it) }
+        val asDegrees: (Float) -> String = { it.times(360).roundToInt().toString() }
+        val as8bitColor: (Float) -> String = { it.times(256).roundToInt().toString() }
     }
 }
