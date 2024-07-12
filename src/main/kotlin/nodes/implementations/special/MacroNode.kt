@@ -14,6 +14,7 @@ class MacroNode : INodeBase, INodeHasOutputParams {
     override val uuid: NodeUUID = NodeUUID()
 
     override val outputParams = NodeParameterMap(
+        NodeParameter(ParameterType.Index, data = 1.0f, isExposed = false),
         NodeParameter(ParameterType.Generic)
     )
 }

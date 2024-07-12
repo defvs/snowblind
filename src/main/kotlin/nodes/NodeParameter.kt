@@ -60,6 +60,7 @@ enum class ParameterType(
 ) {
     // Macro / Others
     Generic("Generic", ValueConverter.asInteger),
+    Index("Index", ValueConverter.asInteger),
 
     // Base positions
     BasePosX("X Position", ValueConverter.asInteger),

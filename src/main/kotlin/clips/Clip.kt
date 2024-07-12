@@ -59,7 +59,7 @@ sealed class Clip {
         connectionMap.addConnection(connection)
     }
 
-    private fun processParameters(node: INodeBase) {
+    private fun processParameters(node: INodeBase, macroValues: FloatArray) {
         if (node !is INodeHasInputParams || processedParamsCache.contains(node.uuid)) return
         node.inputParams.forEach { param ->
             val sourceNode = connectionMap
@@ -68,7 +68,13 @@ sealed class Clip {
             val sourceParam = sourceNode.outputParams[param.uuid] ?: return@forEach
             when (sourceNode) {
                 is ParameterTransformNode -> sourceNode.processParameter()
-                is MacroNode -> return
+                is MacroNode -> {
+                    val index = sourceNode.outputParams[ParameterType.Index]!!.data.toInt()
+                    if (index in macroValues.indices) {
+                        sourceNode.outputParams[ParameterType.Generic] = macroValues[index]
+                    }
+                }
+
                 else -> return
             }
             node.inputParams[param.uuid] = sourceParam.data
@@ -76,15 +82,15 @@ sealed class Clip {
         }
     }
 
-    private fun processNode(node: INodeBase): List<LaserObject> {
+    private fun processNode(node: INodeBase, macroValues: FloatArray): List<LaserObject> {
         laserObjectCache[node.uuid]?.let { return it }
-        processParameters(node)
+        processParameters(node, macroValues)
         return when (node) {
             is GeneratorNode -> node.laserOutput
             is TransformNode -> {
                 val inputConnection = connectionMap.getConnectionByConnector(node.laserInputUUID)
                 val inputNode = inputConnection?.source?.nodeUUID?.let { nodes[it] }
-                val inputLaser = inputNode?.let { processNode(it) } ?: emptyList()
+                val inputLaser = inputNode?.let { processNode(it, macroValues) } ?: emptyList()
                 node.processLaser(inputLaser)
             }
 
@@ -97,9 +103,10 @@ sealed class Clip {
     /**
      * Processes all nodes and returns the final output.
      *
+     * @param macroValues Array of macro values to update the MacroNode parameters.
      * @return List of processed laser objects.
      */
-    open fun process(): List<LaserObject> {
+    open fun process(macroValues: FloatArray): List<LaserObject> {
         val outputNodes = nodes.values.filterIsInstance<OutputNode>().ifEmpty { return emptyList() }
 
         val laserObjects = mutableListOf<LaserObject>()
@@ -108,7 +115,7 @@ sealed class Clip {
             val inputConnection = connectionMap.getConnectionByConnector(outputNode.laserInputUUID)
             val inputNode = inputConnection?.source?.nodeUUID?.let { nodes[it] }
             if (inputNode != null) {
-                laserObjects.addAll(processNode(inputNode))
+                laserObjects.addAll(processNode(inputNode, macroValues))
             }
         }
 
@@ -140,13 +147,14 @@ class EffectClip(
      * Processes the effect clip with the provided input laser objects.
      *
      * @param input List of input laser objects.
+     * @param macroValues Array of macro values to update the MacroNode parameters.
      * @return List of processed laser objects.
      */
-    fun process(input: List<LaserObject>): List<LaserObject> {
+    fun process(input: List<LaserObject>, macroValues: FloatArray): List<LaserObject> {
         super.nodes.values.filterIsInstance<InputNode>()
             .ifEmpty { return emptyList() }.onEach {
                 it.laserOutput = input
             }
-        return super.process()
+        return super.process(macroValues)
     }
 }
