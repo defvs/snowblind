@@ -1,17 +1,30 @@
 package ui.nodes
 
 import helpers.ConnectorUUID
+import helpers.NodeUUID
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Label
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
 import nodes.*
 
+class NodeUIElementCircle(
+    radius: Double,
+    fill: Paint ,
+    val connectorUUID: ConnectorUUID,
+    val parentNodeUUID: NodeUUID,
+) : Circle(radius, fill)
+
 class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
+    var onHeaderMousePressed: (e: MouseEvent) -> Unit = {}
+    var onHeaderMouseDragged: (e: MouseEvent) -> Unit = {}
+
     data class NodeIO(
         val name: String,
         val uuid: ConnectorUUID,
@@ -31,6 +44,8 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
             isPickOnBounds = true // Makes the entire title container pickable
             id = "dragbox"
             styleClass.add("title-container")
+            setOnMousePressed { onHeaderMousePressed(it) }
+            setOnMouseDragged { onHeaderMouseDragged(it) }
         }
 
         val inputs: List<NodeIO> = buildList {
@@ -58,19 +73,19 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
         }
 
         val inputColumn = VBox(10.0)
-        inputs.forEach { (name, _) ->
+        inputs.forEach { (name, uuid) ->
             val inputItem = HBox(10.0)
-            val circle = Circle(5.0, Color.RED)
+            val circle = NodeUIElementCircle(5.0, Color.RED, uuid, this.uuid)
             val nameLabel = Label(name)
             inputItem.children.addAll(circle, nameLabel)
             inputColumn.children.add(inputItem)
         }
 
         val outputColumn = VBox(10.0)
-        outputs.forEach { (name, _) ->
+        outputs.forEach { (name, uuid) ->
             val outputItem = HBox(10.0)
             val nameLabel = Label(name)
-            val circle = Circle(5.0, Color.GREEN)
+            val circle = NodeUIElementCircle(5.0, Color.GREEN, uuid, this.uuid)
             outputItem.children.addAll(nameLabel, circle)
             outputColumn.children.add(outputItem)
         }
