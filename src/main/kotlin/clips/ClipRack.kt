@@ -14,10 +14,10 @@ class ClipRack(
 
     fun generateOutput(enabledGeneratorClips: List<Int>, enabledEffectClips: List<Int>) =
         enabledGeneratorClips.flatMap { i ->
-            generatorClips[i]?.process() ?: emptyList()
+            generatorClips[i]?.process(FloatArray(32) { 0f }) ?: emptyList() // fixme: macroArray
         }.let {
             enabledEffectClips.fold(it) { acc, i ->
-                effectClips[i]?.process(acc) ?: acc
+                effectClips[i]?.process(acc, FloatArray(32) { 0f }) ?: acc
             }
         }
 }
