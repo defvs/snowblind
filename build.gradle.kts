@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.9.24"
+    kotlin("jvm") version "2.0.0"
     application
     id("org.openjfx.javafxplugin") version "0.1.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -67,8 +67,10 @@ dependencies {
     // IPC
     implementation("org.zeromq:jeromq:0.5.2")
 
+    // Color library
     implementation("com.github.ajalt.colormath:colormath:3.6.0")
 
+    // Serialization to JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
     //////////////
