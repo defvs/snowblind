@@ -1,0 +1,18 @@
+.node-ui-element {
+    -fx-background-color: white;
+    -fx-border-color: black;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 20px;
+}
+
+.title-container {
+    -fx-background-color: black;
+    -fx-padding: 10px;
+}
+
+.title-label {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
