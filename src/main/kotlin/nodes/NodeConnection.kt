@@ -31,6 +31,9 @@ data class NodeConnection(
         NodeConnectionUUID(sourceNodeUUID, sourceConnectorUUID),
         NodeConnectionUUID(destNodeUUID, destConnectorUUID)
     )
+
+    operator fun contains(connectorUUID: ConnectorUUID) =
+        source.connectorUUID == connectorUUID || dest.connectorUUID == connectorUUID
 }
 
 /**
@@ -40,7 +43,6 @@ data class NodeConnection(
  */
 @Serializable(with = NodeConnectionMapSerializer::class)
 class NodeConnectionMap(vararg connections: NodeConnection) {
-    private val connectionsByNode = hashMapOf<NodeUUID, MutableList<NodeConnection>>()
     private val connectionsByConnector = hashMapOf<ConnectorUUID, NodeConnection>()
 
     val connections: Collection<NodeConnection>
@@ -56,23 +58,11 @@ class NodeConnectionMap(vararg connections: NodeConnection) {
      * @param connection The connection to add.
      */
     fun addConnection(connection: NodeConnection) {
-        connectionsByNode.computeIfAbsent(connection.source.nodeUUID) { mutableListOf() }.add(connection)
-        connectionsByNode.computeIfAbsent(connection.dest.nodeUUID) { mutableListOf() }.add(connection)
         connectionsByConnector[connection.source.connectorUUID] = connection
         connectionsByConnector[connection.dest.connectorUUID] = connection
     }
 
     operator fun plusAssign(connection: NodeConnection) = addConnection(connection)
-
-    /**
-     * Gets connections by the node UUID.
-     *
-     * @param nodeUUID The UUID of the node.
-     * @return List of connections related to the node.
-     */
-    fun getConnectionsByNode(nodeUUID: NodeUUID): List<NodeConnection> {
-        return connectionsByNode[nodeUUID] ?: emptyList()
-    }
 
     /**
      * Gets a connection by the connector UUID.
@@ -82,5 +72,15 @@ class NodeConnectionMap(vararg connections: NodeConnection) {
      */
     fun getConnectionByConnector(connectorUUID: ConnectorUUID): NodeConnection? {
         return connectionsByConnector[connectorUUID]
+    }
+
+    fun removeConnection(connectorUUID: ConnectorUUID) {
+        connectionsByConnector.values.removeIf {
+            it.dest.connectorUUID == connectorUUID || it.source.connectorUUID == connectorUUID
+        }
+    }
+    fun removeConnection(connection: NodeConnection) {
+        removeConnection(connection.source.connectorUUID)
+        removeConnection(connection.dest.connectorUUID)
     }
 }
