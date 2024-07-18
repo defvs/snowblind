@@ -3,12 +3,12 @@
     -fx-border-color: black;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
-    -fx-padding: 20px;
 }
 
 .title-container {
     -fx-background-color: black;
     -fx-padding: 10px;
+    -fx-background-radius: 10px;
 }
 
 .title-label {

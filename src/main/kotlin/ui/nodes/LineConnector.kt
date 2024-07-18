@@ -1,7 +1,5 @@
 package ui.nodes
 
-import helpers.ConnectorUUID
-import javafx.scene.shape.Circle
 import javafx.scene.shape.Line
 import nodes.NodeConnection
 

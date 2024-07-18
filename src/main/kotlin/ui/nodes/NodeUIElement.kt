@@ -1,7 +1,6 @@
 package ui.nodes
 
 import helpers.ConnectorUUID
-import helpers.NodeUUID
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Label
@@ -10,33 +9,7 @@ import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
-import javafx.scene.shape.Circle
 import nodes.*
-
-class NodeUIElementCircle(
-    radius: Double,
-    fill: Paint,
-    val connectorUUID: ConnectorUUID,
-    val parentNodeUUID: NodeUUID,
-    val connectorType: ConnectorType,
-) : Circle(radius, fill) {
-    enum class ConnectorType(val isInput: Boolean) {
-        LaserInput(true),
-        LaserOutput(false),
-        ParameterInput(true),
-        ParameterOutput(false),
-        ;
-
-        val opposite: ConnectorType
-            get() = when (this) {
-                LaserInput -> LaserOutput
-                LaserOutput -> LaserInput
-                ParameterInput -> ParameterInput
-                ParameterOutput -> ParameterOutput
-            }
-    }
-}
 
 class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
     var onHeaderMousePressed: (e: MouseEvent) -> Unit = {}
@@ -119,10 +92,10 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
         gridPane.add(outputColumn, 1, 0)
         gridPane.hgap = 20.0
         gridPane.alignment = Pos.CENTER
-        gridPane.padding = Insets(20.0)
+        gridPane.padding = Insets(8.0, 0.0, 5.0, 0.0)
 
         this.alignment = Pos.TOP_CENTER
-        this.spacing = 20.0
+        this.spacing = 0.0
         this.children.addAll(titleContainer, gridPane)
 
         ioCircles = ioCirclesBuilder

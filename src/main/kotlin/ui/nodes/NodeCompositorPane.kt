@@ -20,7 +20,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     init {
+        // Add clip nodes into view
         clip.nodes.values.forEach { addNode(it.createUIElement()) }
+        // Add clip connections into view
         clip.connectionMap.connections.forEach { nodeConnection ->
             connections += createConnectionLine(nodeConnection).also { children.add(it) }
             connections += createConnectionLine(nodeConnection).also { children.add(it) }
@@ -29,6 +31,14 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
         setOnMousePressed { onMousePressed(it) }
         setOnMouseDragged { onMouseDragged(it) }
         setOnMouseReleased { onMouseReleased(it) }
+    }
+
+    // region Node Header movement
+    private object NodeDragContext {
+        var initialX: Double = 0.0
+        var initialY: Double = 0.0
+        var offsetX: Double = 0.0
+        var offsetY: Double = 0.0
     }
 
     private fun onNodeHeaderPressed(event: MouseEvent) {
@@ -51,6 +61,18 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
             val parentNodeUI = node.parent as? NodeUIElement ?: return
             parentNodeUI.layoutX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
             parentNodeUI.layoutY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
+        }
+    }
+    // endregion
+
+    // region Mouse events
+    private object NodeConnectorDragContext {
+        var sourceNode: NodeUUID? = null
+        var sourceConnector: NodeUIElementCircle? = null
+
+        fun reset() {
+            sourceNode = null
+            sourceConnector = null
         }
     }
 
@@ -111,6 +133,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
         NodeConnectorDragContext.reset()
     }
 
+    // endregion
+
+    // region Node Connection functions
     private fun connectNodes(nodeConnection: NodeConnection) {
         createConnectionLine(nodeConnection).let {
             children += it
@@ -133,7 +158,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
         val destinationConnector = getNode(connection.dest.nodeUUID)!!.getConnectorCircle(connection.dest.connectorUUID)
         return LineConnector(sourceConnector, destinationConnector, connection)
     }
+    // endregion
 
+    // region Node functions
     fun addNode(node: INodeBase) {
         clip += node
         node.createUIElement().apply {
@@ -148,23 +175,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     private fun getNode(uuid: NodeUUID) = this.children.find { (it as? NodeUIElement)?.uuid == uuid } as? NodeUIElement
-
-    private object NodeDragContext {
-        var initialX: Double = 0.0
-        var initialY: Double = 0.0
-        var offsetX: Double = 0.0
-        var offsetY: Double = 0.0
-    }
-
-    private object NodeConnectorDragContext {
-        var sourceNode: NodeUUID? = null
-        var sourceConnector: NodeUIElementCircle? = null
-
-        fun reset() {
-            sourceNode = null
-            sourceConnector = null
-        }
-    }
+    // endregion
 }
 
 private fun <E> MutableList<E>.front(node: E) {
