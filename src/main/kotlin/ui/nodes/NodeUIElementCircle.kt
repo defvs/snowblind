@@ -23,8 +23,8 @@ class NodeUIElementCircle(
             get() = when (this) {
                 LaserInput -> LaserOutput
                 LaserOutput -> LaserInput
-                ParameterInput -> ParameterInput
-                ParameterOutput -> ParameterOutput
+                ParameterInput -> ParameterOutput
+                ParameterOutput -> ParameterInput
             }
     }
 }

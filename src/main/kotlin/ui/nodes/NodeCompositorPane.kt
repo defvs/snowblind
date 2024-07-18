@@ -120,11 +120,22 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
                 if (NodeConnectorDragContext.sourceNode == node.parentNodeUUID) return
                 if (NodeConnectorDragContext.sourceConnector!!.connectorUUID == node.connectorUUID) return
                 if (NodeConnectorDragContext.sourceConnector!!.connectorType.opposite != node.connectorType) return
+
                 connectNodes(
-                    NodeConnection(
-                        NodeConnectorDragContext.sourceNode!!, NodeConnectorDragContext.sourceConnector!!.connectorUUID,
-                        node.parentNodeUUID, node.connectorUUID
-                    )
+                    if (!NodeConnectorDragContext.sourceConnector!!.connectorType.isInput)
+                        NodeConnection(
+                            NodeConnectorDragContext.sourceNode!!,
+                            NodeConnectorDragContext.sourceConnector!!.connectorUUID,
+                            node.parentNodeUUID,
+                            node.connectorUUID
+                        )
+                    else
+                        NodeConnection(
+                            node.parentNodeUUID,
+                            node.connectorUUID,
+                            NodeConnectorDragContext.sourceNode!!,
+                            NodeConnectorDragContext.sourceConnector!!.connectorUUID
+                        )
                 )
             }
 
