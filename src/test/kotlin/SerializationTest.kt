@@ -11,7 +11,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 import nodes.INodeBase
 import nodes.NodeConnection
-import nodes.ParameterType
 import nodes.implementations.generators.PointGeneratorNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
@@ -27,10 +26,10 @@ class SerializationTest : DescribeSpec({
     }
 
     val node1 = PointGeneratorNode().apply {
-        inputParams[ParameterType.Red] = 1.0f
+        inputParams[0] = 1.0f
     }
     val node2 = PositionOffsetTransformNode().apply {
-        inputParams[ParameterType.OffsetX] = 3.0f
+        inputParams[0] = 3.0f
     }
     val node3 = OutputNode()
     val node4 = MacroNode()
@@ -46,8 +45,8 @@ class SerializationTest : DescribeSpec({
         node3.uuid, node3.laserInputUUID
     )
     val connection3 = NodeConnection(
-        node4.uuid, node4.outputParams[ParameterType.Generic]!!.uuid,
-        node2.uuid, node2.inputParams[ParameterType.OffsetY]!!.uuid
+        node4.uuid, node4.outputParams[0].uuid,
+        node2.uuid, node2.inputParams[1].uuid
     )
 
     val connectionList = listOf(connection1, connection2, connection3)
@@ -59,7 +58,7 @@ class SerializationTest : DescribeSpec({
 
     describe("Clip serialization and deserialization") {
         it("should serialize and deserialize clip without exceptions") {
-            val output = jsonEncoder.encodeToString(clip)
+            val output = jsonEncoder.encodeToString(clip).also { println("Deserialized clip:\n${it}") }
             val deserializedClip = jsonEncoder.decodeFromString<Clip>(output) as GeneratorClip
 
             deserializedClip.name shouldBe "Clip1"

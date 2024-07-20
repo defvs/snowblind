@@ -61,7 +61,7 @@ sealed class Clip {
 
     private fun processParameters(node: INodeBase, macroValues: FloatArray) {
         if (node !is INodeHasInputParams || processedParamsCache.contains(node.uuid)) return
-        node.inputParams.forEach { param ->
+        node.inputParams.parameters.forEach { param ->
             val sourceNode = connectionMap
                 .getConnectionByConnector(param.uuid)?.source?.nodeUUID?.let { nodes[it] }
             if (sourceNode !is INodeHasOutputParams) return@forEach
@@ -69,9 +69,9 @@ sealed class Clip {
             when (sourceNode) {
                 is ParameterTransformNode -> sourceNode.processParameter()
                 is MacroNode -> {
-                    val index = sourceNode.outputParams[ParameterType.Index]!!.data.toInt()
+                    val index = sourceNode.macroNumber
                     if (index in macroValues.indices) {
-                        sourceNode.outputParams[ParameterType.Generic] = macroValues[index]
+                        sourceNode.macroOutput = macroValues[index]
                     }
                 }
 
