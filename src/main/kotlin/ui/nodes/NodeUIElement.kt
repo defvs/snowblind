@@ -1,11 +1,13 @@
 package ui.nodes
 
 import helpers.ConnectorUUID
-import helpers.HBox
+import helpers.Insets
+import helpers.StackPane
 import helpers.VBox
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import nodes.*
@@ -32,9 +34,13 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
         this.alignment = Pos.TOP_CENTER
         this.spacing = 0.0
 
-        this.children += HBox {
+        this.children += StackPane {
             alignment = Pos.CENTER
-//            styleClass.add("title-container")
+            isPickOnBounds = true // Makes the entire title container pickable
+            id = IDs.NodeHeaderDragbox
+            padding = Insets(4.0, 8.0)
+            setOnMousePressed { onHeaderMousePressed(it) }
+            setOnMouseDragged { onHeaderMouseDragged(it) }
 
             if (node is INodeHasInputLaser) {
                 NodeUIElementCircle(
@@ -43,24 +49,18 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
                     node.laserInputUUID,
                     node.uuid,
                     ConnectorType.LaserInput
-                ).also {
+                ).apply {
+                    StackPane.setAlignment(this, Pos.CENTER_LEFT)
+                    translateX -= 8.0 + 5.0
+                }.also {
                     children += it
                     ioCircles += it
                 }
             }
 
-            children += HBox {
+            children += Label(name).apply {
                 alignment = Pos.CENTER
-                isPickOnBounds = true // Makes the entire title container pickable
-                id = IDs.NodeHeaderDragbox
-                setOnMousePressed { onHeaderMousePressed(it) }
-                setOnMouseDragged { onHeaderMouseDragged(it) }
-
-                children += Label(name).apply {
-//                styleClass.add("title-label")
-                    alignment = Pos.CENTER
-                    isMouseTransparent = true
-                }
+                isMouseTransparent = true
             }
 
             if (node is INodeHasOutputLaser) {
@@ -70,26 +70,38 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
                     node.laserOutputUUID,
                     node.uuid,
                     ConnectorType.LaserOutput
-                ).also {
+                ).apply {
+                    StackPane.setAlignment(this, Pos.CENTER_RIGHT)
+                    translateX += 8.0 + 5.0
+                }.also {
                     children += it
                     ioCircles += it
                 }
             }
         }
 
-        fun createParameterHBox(
+        fun createParameterPane(
             parameter: Triple<NodeParameterDefinition, NodeParameter, NodeParameterControl>,
             type: ConnectorType?,
         ) = parameter.let { (definition, param, control) ->
-            HBox {
+            StackPane {
                 alignment = Pos.CENTER
+                padding = Insets(4.0, 8.0)
 
                 if (type == ConnectorType.ParameterInput)
                     children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
+                        .apply {
+                            StackPane.setAlignment(this, Pos.CENTER_LEFT)
+                            translateX -= 8.0 + 5.0
+                        }
                         .also { ioCircles += it }
                 children += control.createControl(param.data, definition)
                 if (type == ConnectorType.ParameterOutput)
                     children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
+                        .apply {
+                            StackPane.setAlignment(this, Pos.CENTER_RIGHT)
+                            translateX += 8.0 + 5.0
+                        }
                         .also { ioCircles += it }
             }
         }
@@ -99,12 +111,12 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
         parameters = listOfNotNull(
             (node as? INodeHasInternalParams)?.internalParams
                 ?.also {
-                    it.flatten().map { param -> parameterHBox.children += createParameterHBox(param, null) }
+                    it.flatten().map { param -> parameterHBox.children += createParameterPane(param, null) }
                 },
             (node as? INodeHasInputParams)?.inputParams
                 ?.also {
                     it.flatten().map { param ->
-                        parameterHBox.children += createParameterHBox(
+                        parameterHBox.children += createParameterPane(
                             param,
                             ConnectorType.ParameterInput
                         )
@@ -113,7 +125,7 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
             (node as? INodeHasOutputParams)?.outputParams
                 ?.also {
                     it.flatten().map { param ->
-                        parameterHBox.children += createParameterHBox(
+                        parameterHBox.children += createParameterPane(
                             param,
                             ConnectorType.ParameterOutput
                         )
