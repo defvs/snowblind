@@ -1,4 +1,4 @@
-package nodes.controls
+package ui.nodes.controls
 
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -7,7 +7,7 @@ import nodes.NodeParameterDefinition
 import nodes.ReadableValueConverter
 
 abstract class NodeParameterControl {
-    protected abstract val control: Node
+    protected var control: Node? = null
     open var value: Float = 0.0f
 
     protected abstract fun initControl(
@@ -20,7 +20,7 @@ abstract class NodeParameterControl {
         value: Float,
         range: ClosedFloatingPointRange<Float>,
         valueConverter: ReadableValueConverter,
-    ) = initControl(value, range, valueConverter).let { control }
+    ) = control ?: initControl(value, range, valueConverter).let { control!! }
 
     fun createControl(value: Float, definition: NodeParameterDefinition): Node = createControl(
         value,
@@ -30,8 +30,6 @@ abstract class NodeParameterControl {
 }
 
 class EmptyControl : NodeParameterControl() {
-    override lateinit var control: Node
-
     override fun initControl(
         value: Float,
         range: ClosedFloatingPointRange<Float>,
@@ -43,7 +41,6 @@ class EmptyControl : NodeParameterControl() {
 
 class TestControl : NodeParameterControl() {
     private lateinit var valueLabel: Label
-    override lateinit var control: Node
 
     private var actualValue: Float = 0.0f
     private lateinit var valueConverter: ReadableValueConverter

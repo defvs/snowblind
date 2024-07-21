@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.Encoder
 import laser.LaserObject
 import nodes.INodeHasInputParams
 import nodes.TransformNode
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.parameters
@@ -58,9 +58,9 @@ class HSVShiftNode(
     override fun processLaser(input: List<LaserObject>) = input.onEach { laserObject ->
         laserObject.transformColorHSL {
             HSL(
-                (it.h + inputParams[0].data).mod(1.0),
-                (it.s + inputParams[1].data).mod(1.0),
-                (it.l + inputParams[2].data).mod(1.0)
+                (it.h + inputParams[0]).mod(1.0),
+                (it.s + inputParams[1]).mod(1.0),
+                (it.l + inputParams[2]).mod(1.0)
             )
         }
     }

@@ -3,8 +3,9 @@ package ui.nodes
 import clips.Clip
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.findParent
+import javafx.scene.Node
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import nodes.INodeBase
@@ -42,9 +43,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderPressed(event: MouseEvent) {
-        val node = event.target as? HBox ?: return
-        if (node.id == "dragbox") {
-            val parentNodeUI = node.parent as? NodeUIElement ?: return
+        val node = event.target as? Node ?: return
+        if (node.id == IDs.NodeHeaderDragbox) {
+            val parentNodeUI = node.findParent<NodeUIElement>() ?: return
             this.children.front(parentNodeUI)
             NodeDragContext.apply {
                 initialX = parentNodeUI.layoutX
@@ -56,9 +57,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderDragged(event: MouseEvent) {
-        val node = event.target as? HBox ?: return
-        if (node.id == "dragbox") {
-            val parentNodeUI = node.parent as? NodeUIElement ?: return
+        val node = event.target as? Node ?: return
+        if (node.id == IDs.NodeHeaderDragbox) {
+            val parentNodeUI = node.findParent<NodeUIElement>() ?: return
             parentNodeUI.layoutX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
             parentNodeUI.layoutY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
         }
@@ -97,7 +98,6 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
                     }
                 }
             }
-
             else -> return
         }
     }

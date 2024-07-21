@@ -10,7 +10,7 @@ import kotlinx.serialization.encoding.Encoder
 import nodes.INodeBase
 import nodes.INodeHasInternalParams
 import nodes.INodeHasOutputParams
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.parameters
@@ -45,14 +45,14 @@ class MacroNode(
     }
 
     var macroOutput
-        get() = outputParams[0].data
+        get() = outputParams[0]
         set(value) {
-            outputParams[0].data = value
+            outputParams[0] = value
         }
     var macroNumber
-        get() = internalParams[0].data.toInt()
+        get() = internalParams[0].toInt()
         set(value) {
-            internalParams[0].data = value.toFloat()
+            internalParams[0] = value.toFloat()
         }
 
     init {

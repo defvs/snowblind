@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.Encoder
 import laser.LaserObject
 import nodes.INodeHasInputParams
 import nodes.TransformNode
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.parameters
@@ -45,13 +45,13 @@ class PositionOffsetTransformNode(
     override fun processLaser(input: List<LaserObject>) = input.onEach { laserObject ->
         laserObject.applyPositionTransform {
             offset(
-                inputParams[0].data,
-                inputParams[1].data,
+                inputParams[0],
+                inputParams[1],
             )
             rotate(
-                inputParams[2].data,
-                inputParams[3].data,
-                inputParams[4].data,
+                inputParams[2],
+                inputParams[3],
+                inputParams[4],
             )
         }
     }

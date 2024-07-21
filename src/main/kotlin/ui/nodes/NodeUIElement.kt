@@ -1,104 +1,128 @@
 package ui.nodes
 
 import helpers.ConnectorUUID
-import javafx.geometry.Insets
+import helpers.HBox
+import helpers.VBox
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.GridPane
-import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import nodes.*
+import ui.nodes.controls.NodeParameterControl
 
 class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
     var onHeaderMousePressed: (e: MouseEvent) -> Unit = {}
     var onHeaderMouseDragged: (e: MouseEvent) -> Unit = {}
 
     private val ioCircles: List<NodeUIElementCircle>
+    private val parameters: List<NodeParameterMap>
 
     data class NodeIO(
         val name: String,
         val uuid: ConnectorUUID,
-        val connectorType: NodeUIElementCircle.ConnectorType,
+        val connectorType: ConnectorType,
     )
 
     init {
-        val ioCirclesBuilder = mutableListOf<NodeUIElementCircle>()
+        val ioCircles = arrayListOf<NodeUIElementCircle>()
 
         this.javaClass.getResource("/ui/nodeUIElement.css")?.toExternalForm()?.let { stylesheets += it }
-        styleClass.add("node-ui-element")
-
-        val titleLabel = Label(name).apply {
-            styleClass.add("title-label")
-            alignment = Pos.CENTER
-            isMouseTransparent = true
-        }
-        val titleContainer = HBox(titleLabel).apply {
-            alignment = Pos.CENTER
-            isPickOnBounds = true // Makes the entire title container pickable
-            id = "dragbox"
-            styleClass.add("title-container")
-            setOnMousePressed { onHeaderMousePressed(it) }
-            setOnMouseDragged { onHeaderMouseDragged(it) }
-        }
-
-        val inputs: List<NodeIO> = buildList {
-            (node as? INodeHasInputLaser)?.let {
-                add(NodeIO("Laser", node.laserInputUUID, NodeUIElementCircle.ConnectorType.LaserInput))
-            }
-
-            (node as? INodeHasInputParams)?.let {
-                addAll(it.inputParams.parameters.map { param ->
-                    NodeIO(param.type.readableName, param.uuid, NodeUIElementCircle.ConnectorType.ParameterInput)
-                })
-            }
-        }
-
-        val outputs: List<NodeIO> = buildList {
-            (node as? INodeHasOutputLaser)?.let {
-                add(NodeIO("Laser", node.laserOutputUUID, NodeUIElementCircle.ConnectorType.LaserOutput))
-            }
-
-            (node as? INodeHasOutputParams)?.let {
-                addAll(it.outputParams.parameters.map { param ->
-                    NodeIO(param.type.readableName, param.uuid, NodeUIElementCircle.ConnectorType.ParameterOutput)
-                })
-            }
-        }
-
-        val inputColumn = VBox(10.0)
-        inputs.forEach { (name, uuid, connectorType) ->
-            val inputItem = HBox(10.0)
-            val circle = NodeUIElementCircle(5.0, Color.RED, uuid, this.uuid, connectorType)
-            val nameLabel = Label(name)
-            ioCirclesBuilder.add(circle)
-            inputItem.children.addAll(circle, nameLabel)
-            inputColumn.children.add(inputItem)
-        }
-
-        val outputColumn = VBox(10.0)
-        outputs.forEach { (name, uuid, connectorType) ->
-            val outputItem = HBox(10.0)
-            val nameLabel = Label(name)
-            val circle = NodeUIElementCircle(5.0, Color.GREEN, uuid, this.uuid, connectorType)
-            ioCirclesBuilder.add(circle)
-            outputItem.children.addAll(nameLabel, circle)
-            outputColumn.children.add(outputItem)
-        }
-
-        val gridPane = GridPane()
-        gridPane.add(inputColumn, 0, 0)
-        gridPane.add(outputColumn, 1, 0)
-        gridPane.hgap = 20.0
-        gridPane.alignment = Pos.CENTER
-        gridPane.padding = Insets(8.0, 0.0, 5.0, 0.0)
-
+        this.styleClass.add("node-ui-element")
         this.alignment = Pos.TOP_CENTER
         this.spacing = 0.0
-        this.children.addAll(titleContainer, gridPane)
 
-        ioCircles = ioCirclesBuilder
+        this.children += HBox {
+            alignment = Pos.CENTER
+//            styleClass.add("title-container")
+
+            if (node is INodeHasInputLaser) {
+                NodeUIElementCircle(
+                    5.0,
+                    Color.RED,
+                    node.laserInputUUID,
+                    node.uuid,
+                    ConnectorType.LaserInput
+                ).also {
+                    children += it
+                    ioCircles += it
+                }
+            }
+
+            children += HBox {
+                alignment = Pos.CENTER
+                isPickOnBounds = true // Makes the entire title container pickable
+                id = IDs.NodeHeaderDragbox
+                setOnMousePressed { onHeaderMousePressed(it) }
+                setOnMouseDragged { onHeaderMouseDragged(it) }
+
+                children += Label(name).apply {
+//                styleClass.add("title-label")
+                    alignment = Pos.CENTER
+                    isMouseTransparent = true
+                }
+            }
+
+            if (node is INodeHasOutputLaser) {
+                NodeUIElementCircle(
+                    5.0,
+                    Color.RED,
+                    node.laserOutputUUID,
+                    node.uuid,
+                    ConnectorType.LaserOutput
+                ).also {
+                    children += it
+                    ioCircles += it
+                }
+            }
+        }
+
+        fun createParameterHBox(
+            parameter: Triple<NodeParameterDefinition, NodeParameter, NodeParameterControl>,
+            type: ConnectorType?,
+        ) = parameter.let { (definition, param, control) ->
+            HBox {
+                alignment = Pos.CENTER
+
+                if (type == ConnectorType.ParameterInput)
+                    children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
+                        .also { ioCircles += it }
+                children += control.createControl(param.data, definition)
+                if (type == ConnectorType.ParameterOutput)
+                    children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
+                        .also { ioCircles += it }
+            }
+        }
+
+        val parameterHBox = VBox {}
+
+        parameters = listOfNotNull(
+            (node as? INodeHasInternalParams)?.internalParams
+                ?.also {
+                    it.flatten().map { param -> parameterHBox.children += createParameterHBox(param, null) }
+                },
+            (node as? INodeHasInputParams)?.inputParams
+                ?.also {
+                    it.flatten().map { param ->
+                        parameterHBox.children += createParameterHBox(
+                            param,
+                            ConnectorType.ParameterInput
+                        )
+                    }
+                },
+            (node as? INodeHasOutputParams)?.outputParams
+                ?.also {
+                    it.flatten().map { param ->
+                        parameterHBox.children += createParameterHBox(
+                            param,
+                            ConnectorType.ParameterOutput
+                        )
+                    }
+                },
+        )
+
+        this.children += parameterHBox
+        this.ioCircles = ioCircles
     }
 
     fun getConnectorCircle(connectorUUID: ConnectorUUID) = ioCircles.first { it.connectorUUID == connectorUUID }

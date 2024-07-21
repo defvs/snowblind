@@ -2,14 +2,16 @@ package helpers
 
 import javafx.geometry.Point2D
 import javafx.scene.Node
+import javafx.scene.layout.HBox
+import javafx.scene.layout.VBox
 
-inline fun <reified T : Node> Node.findParent(): T {
+inline fun <reified T : Node> Node.findParent(): Node? {
     var current: Node? = this.parent
     while (current != null) {
         if (current is T) return current
         current = current.parent
     }
-    throw NoSuchElementException("No parent of type ${T::class} found")
+    return null
 }
 
 fun Node.coordinateToParent(parent: Node, position: Point2D): Point2D {
@@ -22,3 +24,6 @@ fun Node.coordinateToParent(parent: Node, position: Point2D): Point2D {
     }
     throw NoSuchElementException("Parent was not found in the hierarchy")
 }
+
+fun HBox(apply: HBox.() -> Unit) = HBox().apply(apply)
+fun VBox(apply: VBox.() -> Unit) = VBox().apply(apply)

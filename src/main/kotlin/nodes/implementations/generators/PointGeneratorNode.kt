@@ -12,7 +12,7 @@ import laser.LaserObject
 import laser.Point
 import nodes.GeneratorNode
 import nodes.INodeHasInputParams
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.parameters
@@ -70,12 +70,12 @@ class PointGeneratorNode(
         get() = listOf(
             LaserObject(
                 Point(
-                    inputParams[0].data,
-                    inputParams[1].data,
+                    inputParams[0],
+                    inputParams[1],
                 ), RGB(
-                    inputParams[2].data,
-                    inputParams[3].data,
-                    inputParams[4].data,
+                    inputParams[2],
+                    inputParams[3],
+                    inputParams[4],
                 )
             )
         )

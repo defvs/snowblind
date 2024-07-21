@@ -65,7 +65,7 @@ sealed class Clip {
             val sourceNode = connectionMap
                 .getConnectionByConnector(param.uuid)?.source?.nodeUUID?.let { nodes[it] }
             if (sourceNode !is INodeHasOutputParams) return@forEach
-            val sourceParam = sourceNode.outputParams[param.uuid] ?: return@forEach
+            val sourceParam = sourceNode.outputParams.getParameter(param.uuid) ?: return@forEach
             when (sourceNode) {
                 is ParameterTransformNode -> sourceNode.processParameter()
                 is MacroNode -> {
@@ -77,7 +77,7 @@ sealed class Clip {
 
                 else -> return
             }
-            node.inputParams[param.uuid] = sourceParam.data
+            node.inputParams.setValue(param.uuid, sourceParam.data)
             processedParamsCache += node.uuid
         }
     }

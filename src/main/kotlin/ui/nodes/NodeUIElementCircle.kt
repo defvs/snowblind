@@ -11,20 +11,20 @@ class NodeUIElementCircle(
     val connectorUUID: ConnectorUUID,
     val parentNodeUUID: NodeUUID,
     val connectorType: ConnectorType,
-) : Circle(radius, fill) {
-    enum class ConnectorType(val isInput: Boolean) {
-        LaserInput(true),
-        LaserOutput(false),
-        ParameterInput(true),
-        ParameterOutput(false),
-        ;
+) : Circle(radius, fill)
 
-        val opposite: ConnectorType
-            get() = when (this) {
-                LaserInput -> LaserOutput
-                LaserOutput -> LaserInput
-                ParameterInput -> ParameterOutput
-                ParameterOutput -> ParameterInput
-            }
-    }
+enum class ConnectorType(val isInput: Boolean) {
+    LaserInput(true),
+    LaserOutput(false),
+    ParameterInput(true),
+    ParameterOutput(false),
+    ;
+
+    val opposite: ConnectorType
+        get() = when (this) {
+            LaserInput -> LaserOutput
+            LaserOutput -> LaserInput
+            ParameterInput -> ParameterOutput
+            ParameterOutput -> ParameterInput
+        }
 }
