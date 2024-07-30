@@ -1,21 +1,67 @@
 package nodes
 
 import helpers.ConnectorUUID
-import kotlinx.serialization.Serializable
+import nodes.controls.NodeParameterControl
+import nodes.helpers.ReadableValueConverter
 
-typealias ReadableValueConverter = (Float) -> String
+typealias ParameterCompute = (Map<ConnectorUUID, Float>) -> Float
 
-/**
- * Data class representing a node parameter with a UUID and associated data.
- */
-@Serializable
-data class NodeParameter(
-    val uuid: ConnectorUUID = ConnectorUUID(),
-    var data: Float = 0.0f,
-)
+sealed interface NodeParameter {
+    val uuid: ConnectorUUID
+    val name: String
 
-class NodeParameterDefinition(
-    val name: String,
-    val range: ClosedFloatingPointRange<Float>,
-    val valueConverter: ReadableValueConverter,
-)
+    fun resetUUID(uuid: ConnectorUUID): NodeParameter
+
+    sealed class ControllableParameter : NodeParameter {
+        abstract val defaultValue: Float
+        abstract val range: ClosedFloatingPointRange<Float>
+        abstract val valueConverter: ReadableValueConverter
+        abstract val control: NodeParameterControl
+
+        var value: Float
+            get() = control.value.get()
+            set(value) = control.value.set(value)
+
+        fun initControl() = control.initControl()
+
+
+        data class ControllableInputParameter(
+            override val uuid: ConnectorUUID,
+            override val name: String,
+            override val range: ClosedFloatingPointRange<Float>,
+            override val valueConverter: ReadableValueConverter,
+            override val control: NodeParameterControl,
+            override val defaultValue: Float,
+        ) : ControllableParameter() {
+            override fun resetUUID(uuid: ConnectorUUID): NodeParameter = this.copy(uuid = uuid)
+        }
+
+        data class InternalParameter(
+            override val uuid: ConnectorUUID,
+            override val name: String,
+            override val range: ClosedFloatingPointRange<Float>,
+            override val valueConverter: ReadableValueConverter,
+            override val control: NodeParameterControl,
+            override val defaultValue: Float,
+        ) : ControllableParameter() {
+            override fun resetUUID(uuid: ConnectorUUID): NodeParameter = this.copy(uuid = uuid)
+        }
+    }
+
+    data class InputParameter(override val uuid: ConnectorUUID, override val name: String) : NodeParameter {
+        override fun resetUUID(uuid: ConnectorUUID): NodeParameter = this.copy(uuid = uuid)
+    }
+    data class OutputParameter(
+        override val uuid: ConnectorUUID,
+        override val name: String,
+        val compute: ParameterCompute,
+    ) : NodeParameter {
+        override fun resetUUID(uuid: ConnectorUUID): NodeParameter = this.copy(uuid = uuid)
+    }
+}
+
+fun NodeParameterMap.mapToInput(
+    inputParameters: Map<ConnectorUUID, Float>,
+) = inputParameters.mapNotNull { (uuid, value) ->
+    this[uuid]?.let { it.name to value }
+}.toMap()

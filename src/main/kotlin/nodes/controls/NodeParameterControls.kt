@@ -1,43 +1,28 @@
 package nodes.controls
 
+import helpers.bindTo
+import javafx.beans.property.FloatProperty
+import javafx.beans.property.SimpleFloatProperty
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
-import nodes.NodeParameterDefinition
-import nodes.ReadableValueConverter
+import nodes.NodeParameter
 
 abstract class NodeParameterControl {
+    lateinit var parameter: NodeParameter.ControllableParameter
+
     protected abstract val control: Node
-    open var value: Float = 0.0f
+    open var value: FloatProperty = SimpleFloatProperty(parameter.defaultValue)
 
-    protected abstract fun initControl(
-        value: Float,
-        range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter,
-    )
-
-    fun createControl(
-        value: Float,
-        range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter,
-    ) = initControl(value, range, valueConverter).let { control }
-
-    fun createControl(value: Float, definition: NodeParameterDefinition): Node = createControl(
-        value,
-        definition.range,
-        definition.valueConverter,
-    )
+    abstract fun initControl(): Node
 }
 
 class EmptyControl : NodeParameterControl() {
     override lateinit var control: Node
 
-    override fun initControl(
-        value: Float,
-        range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter
-    ) {
+    override fun initControl(): Node {
         control = HBox()
+        return control
     }
 }
 
@@ -45,27 +30,13 @@ class TestControl : NodeParameterControl() {
     private lateinit var valueLabel: Label
     override lateinit var control: Node
 
-    private var actualValue: Float = 0.0f
-    private lateinit var valueConverter: ReadableValueConverter
-
-    override var value: Float
-        get() = actualValue
-        set(value) {
-            actualValue = value
-            valueLabel.text = valueConverter(value)
-        }
-
-    override fun initControl(
-        value: Float,
-        range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter,
-    ) {
+    override fun initControl(): Node {
         control = HBox(
-            Label("Test"),
-            Label("").also { valueLabel = it },
+            Label(parameter.name),
+            Label("").apply {
+                textProperty() bindTo value with parameter.valueConverter
+            }.also { valueLabel = it },
         )
-        this.value = value
-        this.valueConverter = valueConverter
+        return control
     }
-
 }

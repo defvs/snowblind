@@ -1,58 +1,52 @@
 package nodes.implementations.special
 
 import helpers.NodeUUID
+import helpers.ConnectorUUID
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import nodes.INodeBase
-import nodes.INodeHasInternalParams
-import nodes.INodeHasOutputParams
+import nodes.*
 import nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
-import nodes.helpers.SimpleValueRanges
-import nodes.parameters
 
 @Serializable(with = MacroNodeSerializer::class)
 class MacroNode(
     override val uuid: NodeUUID = NodeUUID(),
+
+    val macroOutputUUID: ConnectorUUID = ConnectorUUID(),
+
+    macroNumberUUID: ConnectorUUID = ConnectorUUID(),
     macroNumber: Int = 1,
-) : INodeBase, INodeHasOutputParams, INodeHasInternalParams {
-    @Transient override val name = "Macro Node"
-    @Transient override val description = """
+) : INodeBase {
+
+    override val name = "Macro Node"
+    override val description = """
         Parameter Input from your DAW.
     """.trimIndent()
 
-    override val outputParams = parameters {
-        parameter(
+    override val parameters: NodeParameterMap = parameters {
+        output(
             name = "Macro output",
-            range = SimpleValueRanges.infinite,
-            valueConverter = SimpleValueConverters.asDecimal(2),
-            control = EmptyControl()
+            uuid = macroOutputUUID,
+            compute = { throw Exception("compute run on output of MacroNode.") }
         )
-    }
 
-    override val internalParams = parameters {
-        parameter(
+        internal(
             name = "Macro Number",
             range = 1f..32f,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl(),
-            defaultValue = 1f
+            defaultValue = macroNumber.toFloat(),
+            uuid = macroNumberUUID,
         )
     }
 
-    var macroOutput
-        get() = outputParams[0].data
-        set(value) {
-            outputParams[0].data = value
-        }
     var macroNumber
-        get() = internalParams[0].data.toInt()
+        get() = (parameters[0] as NodeParameter.ControllableParameter.InternalParameter).value.toInt()
         set(value) {
-            internalParams[0].data = value.toFloat()
+            (parameters[0] as NodeParameter.ControllableParameter.InternalParameter).value = value.toFloat()
         }
 
     init {
@@ -65,14 +59,24 @@ class MacroNodeSerializer : KSerializer<MacroNode> {
     @Serializable
     private data class Surrogate(
         val uuid: NodeUUID,
+        val outputUUID: ConnectorUUID,
+        val macroNumberUUID: ConnectorUUID,
         val macroNumber: Int,
     )
 
     override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: MacroNode) = encoder.encodeSerializableValue(
-        Surrogate.serializer(), Surrogate(value.uuid, value.macroNumber)
+        Surrogate.serializer(),
+        Surrogate(value.uuid, value.parameters[0].uuid, value.parameters[1].uuid, value.macroNumber)
     )
 
     override fun deserialize(decoder: Decoder) = decoder.decodeSerializableValue(Surrogate.serializer())
-        .let { (uuid, macroNumber) -> MacroNode(uuid, macroNumber) }
+        .let { (uuid, outputUUID, macroNumberUUID, macroNumber) ->
+            MacroNode(
+                uuid,
+                outputUUID,
+                macroNumberUUID,
+                macroNumber
+            )
+        }
 }

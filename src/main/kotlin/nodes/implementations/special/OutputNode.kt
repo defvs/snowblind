@@ -1,22 +1,23 @@
 package nodes.implementations.special
 
-import helpers.ConnectorUUID
 import helpers.NodeUUID
-import kotlinx.serialization.Required
+import helpers.ConnectorUUID
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import nodes.INodeBase
-import nodes.INodeHasInputLaser
+import nodes.NodeParameterMap
+import nodes.parameters
 
 @Serializable
-class OutputNode : INodeBase, INodeHasInputLaser {
-    @Transient override val name = "Laser Output"
+class OutputNode(
+    override val uuid: NodeUUID = NodeUUID(),
+    val laserInputUUID: ConnectorUUID = ConnectorUUID(),
+) : INodeBase {
 
-    @Transient override val description = """
+    override val name = "Laser Output"
+    override val description = """
         Main Output of the clip.
     """.trimIndent()
 
-    @Required override val uuid: NodeUUID = NodeUUID()
-
-    @Required override val laserInputUUID: ConnectorUUID = ConnectorUUID()
+    @Transient override val parameters: NodeParameterMap = parameters { }
 }

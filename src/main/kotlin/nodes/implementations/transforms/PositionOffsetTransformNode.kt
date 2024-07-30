@@ -2,18 +2,14 @@ package nodes.implementations.transforms
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Required
+import helpers.serialization.nodes.TransformNodeSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import laser.LaserObject
-import nodes.INodeHasInputParams
 import nodes.TransformNode
 import nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
+import nodes.mapToInput
 import nodes.parameters
 
 @Serializable(with = PositionOffsetTransformNodeSerializer::class)
@@ -21,62 +17,78 @@ class PositionOffsetTransformNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val laserInputUUID: ConnectorUUID = ConnectorUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
-    inputParamValues: List<Float>? = null,
-) : TransformNode(
-    name = "Position Offset",
-    description = """
+    existingUUIDs: List<ConnectorUUID>,
+    existingValues: Map<ConnectorUUID, Float>,
+) : TransformNode {
+
+    override val name = "Position Offset"
+    override val description = """
         Offsets and/or Rotates the input.
     """.trimIndent()
-), INodeHasInputParams {
 
-    @Required override val inputParams = parameters {
-        parameter("X Offset", SimpleValueRanges.position, SimpleValueConverters.asInteger, EmptyControl())
-        parameter("Y Offset", SimpleValueRanges.position, SimpleValueConverters.asInteger, EmptyControl())
-        parameter("Rotation", SimpleValueRanges.rotation, SimpleValueConverters.asDegrees, EmptyControl())
-        parameter("Rotation X Anchor", SimpleValueRanges.position, SimpleValueConverters.asInteger, EmptyControl())
-        parameter("Rotation Y Anchor", SimpleValueRanges.position, SimpleValueConverters.asInteger, EmptyControl())
+    override val parameters = parameters {
+        internalControllable(
+            name = "X Offset",
+            range = SimpleValueRanges.position,
+            valueConverter = SimpleValueConverters.asInteger,
+            control = EmptyControl()
+        )
+        internalControllable(
+            name = "Y Offset",
+            range = SimpleValueRanges.position,
+            valueConverter = SimpleValueConverters.asInteger,
+            control = EmptyControl()
+        )
+        internalControllable(
+            name = "Rotation",
+            range = SimpleValueRanges.rotation,
+            valueConverter = SimpleValueConverters.asDegrees,
+            control = EmptyControl()
+        )
+        internalControllable(
+            name = "Rotation X Anchor",
+            range = SimpleValueRanges.position,
+            valueConverter = SimpleValueConverters.asInteger,
+            control = EmptyControl()
+        )
+        internalControllable(
+            name = "Rotation Y Anchor",
+            range = SimpleValueRanges.position,
+            valueConverter = SimpleValueConverters.asInteger,
+            control = EmptyControl()
+        )
+
+        withExistingUUIDs(existingUUIDs)
+        withExistingValues(existingValues)
     }
 
-    init {
-        if (inputParamValues != null)
-            inputParams.parameters.forEachIndexed { i, param -> param.data = inputParamValues[i] }
-    }
-
-    override fun processLaser(input: List<LaserObject>) = input.onEach { laserObject ->
-        laserObject.applyPositionTransform {
-            offset(
-                inputParams[0].data,
-                inputParams[1].data,
-            )
-            rotate(
-                inputParams[2].data,
-                inputParams[3].data,
-                inputParams[4].data,
-            )
+    override fun transformLaser(
+        inputLaser: List<LaserObject>,
+        inputParameters: Map<ConnectorUUID, Float>,
+    ): List<LaserObject> {
+        val data = parameters.mapToInput(inputParameters)
+        return inputLaser.onEach { laserObject ->
+            laserObject.applyPositionTransform {
+                offset(
+                    data["X Offset"]!!,
+                    data["Y Offset"]!!
+                )
+                rotate(
+                    data["Rotation"]!!,
+                    data["Rotation X Anchor"]!!,
+                    data["Rotation Y Anchor"]!!
+                )
+            }
         }
     }
 }
 
-class PositionOffsetTransformNodeSerializer : KSerializer<PositionOffsetTransformNode> {
-    @Serializable
-    private data class Surrogate(
-        val uuid: NodeUUID,
-        val laserInputUUID: ConnectorUUID,
-        val laserOutputUUID: ConnectorUUID,
-        val parameterValues: List<Float>,
+class PositionOffsetTransformNodeSerializer : TransformNodeSerializer<PositionOffsetTransformNode>({
+    PositionOffsetTransformNode(
+        it.uuid,
+        it.laserInputUUID,
+        it.laserOutputUUID,
+        it.parametersUUIDs,
+        it.internalParametersValues
     )
-
-    override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
-    override fun serialize(encoder: Encoder, value: PositionOffsetTransformNode) =
-        encoder.encodeSerializableValue(Surrogate.serializer(), Surrogate(
-            value.uuid,
-            value.laserInputUUID,
-            value.laserOutputUUID,
-            value.inputParams.parameters.map { it.data }
-        ))
-
-    override fun deserialize(decoder: Decoder) = decoder.decodeSerializableValue(Surrogate.serializer())
-        .let { (uuid, laserInputUUID, laserOutputUUID, parameterValues) ->
-            PositionOffsetTransformNode(uuid, laserInputUUID, laserOutputUUID, parameterValues)
-        }
-}
+})

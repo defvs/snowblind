@@ -1,55 +1,94 @@
 package nodes
 
 import helpers.ConnectorUUID
+import helpers.replaceAllIndexed
 import nodes.controls.NodeParameterControl
+import nodes.helpers.ReadableValueConverter
 
 class NodeParameterMap(
-    vararg parameters: NodeParameterMapInput,
+    vararg parameters: NodeParameter,
 ) {
-    class NodeParameterMapInput(
-        val definition: NodeParameterDefinition,
-        val control: NodeParameterControl,
-        val defaultValue: Float = 0f,
-    )
+    val parameters: List<NodeParameter> = parameters.toList()
+    private val parametersByUUID: Map<ConnectorUUID, NodeParameter> = parameters.associateBy { it.uuid }
+    private val parametersByName: Map<String, NodeParameter> = parameters.associateBy { it.name }
 
-    val definitions: List<NodeParameterDefinition>
-    val parameters: List<NodeParameter>
-    val controls: List<NodeParameterControl>
-    private val parametersByUUID: Map<ConnectorUUID, NodeParameter>
-
-    init {
-        this.definitions = parameters.map { it.definition }
-        this.parameters = parameters.map { NodeParameter(data = it.defaultValue) }
-        this.controls = parameters.map { it.control }
-        parametersByUUID = this.parameters.associateBy { it.uuid }
-    }
-
+    operator fun get(name: String) = parametersByName[name]
     operator fun get(uuid: ConnectorUUID) = parametersByUUID[uuid]
     operator fun get(index: Int) = parameters[index]
+
     operator fun set(uuid: ConnectorUUID, value: Float) {
-        parametersByUUID[uuid]!!.data = value
+        (parametersByUUID[uuid] as? NodeParameter.ControllableParameter)?.value = value
+    }
+    operator fun set(index: Int, value: Float) {
+        (parameters[index] as? NodeParameter.ControllableParameter)?.value = value
     }
 
-    operator fun set(index: Int, value: Float) {
-        parameters[index].data = value
-    }
+    fun computeOutputParams(inputs: Map<ConnectorUUID, Float>) =
+        parameters.filterIsInstance<NodeParameter.OutputParameter>().associate {
+            it.uuid to it.compute(inputs)
+        }
+
 }
 
 class NodeParameterMapBuilder {
-    private val inputs = mutableListOf<NodeParameterMap.NodeParameterMapInput>()
+    private val parameters = mutableListOf<NodeParameter>()
 
-    fun parameter(
+    fun internal(
         name: String,
+        uuid: ConnectorUUID = ConnectorUUID(),
         range: ClosedFloatingPointRange<Float>,
         valueConverter: ReadableValueConverter,
         control: NodeParameterControl,
-        defaultValue: Float = 0f
-    ) {
-        val definition = NodeParameterDefinition(name, range, valueConverter)
-        inputs.add(NodeParameterMap.NodeParameterMapInput(definition, control, defaultValue))
+        defaultValue: Float = 0f,
+    ) = parameters.add(
+        NodeParameter.ControllableParameter.InternalParameter(
+            uuid, name, range, valueConverter, control, defaultValue
+        ).also { control.parameter = it }
+    )
+
+    fun internalControllable(
+        name: String,
+        uuid: ConnectorUUID = ConnectorUUID(),
+        range: ClosedFloatingPointRange<Float>,
+        valueConverter: ReadableValueConverter,
+        control: NodeParameterControl,
+        defaultValue: Float = 0f,
+    ) = parameters.add(
+        NodeParameter.ControllableParameter.ControllableInputParameter(
+            uuid, name, range, valueConverter, control, defaultValue
+        ).also { control.parameter = it }
+    )
+
+    fun output(
+        name: String,
+        uuid: ConnectorUUID = ConnectorUUID(),
+        compute: ParameterCompute,
+    ) = parameters.add(NodeParameter.OutputParameter(uuid, name, compute))
+
+    fun input(
+        name: String,
+        uuid: ConnectorUUID = ConnectorUUID(),
+    ) = parameters.add(NodeParameter.InputParameter(uuid, name))
+
+    fun withExistingUUIDs(uuids: List<ConnectorUUID>) {
+        this.parameters.replaceAllIndexed { index, source ->
+            source.resetUUID(uuids[index])
+        }
     }
 
-    fun build(): NodeParameterMap = NodeParameterMap(*inputs.toTypedArray())
+    fun withExistingValues(values: Map<ConnectorUUID, Float>) {
+        values.forEach { (uuid, value) ->
+            when (val parameter = parameters.find { it.uuid == uuid }) {
+                is NodeParameter.ControllableParameter -> {
+                    parameter.control.value.set(value)
+                }
+
+                else -> throw Exception("withExistingValues called with an UUID of a non-controllable parameter.")
+            }
+        }
+    }
+
+    fun build(): NodeParameterMap = NodeParameterMap(*parameters.toTypedArray())
 }
 
 fun parameters(block: NodeParameterMapBuilder.() -> Unit): NodeParameterMap {
