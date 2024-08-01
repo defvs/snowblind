@@ -7,19 +7,29 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import helpers.NodeUUID
 import helpers.ConnectorUUID
+import kotlinx.serialization.ExperimentalSerializationApi
 import nodes.GeneratorNode
 import nodes.NodeParameter
+import kotlin.reflect.KClass
 
-abstract class GeneratorNodeSerializer<T : GeneratorNode>(private val createNode: (Surrogate) -> T) : KSerializer<T> {
+@OptIn(ExperimentalSerializationApi::class)
+abstract class GeneratorNodeSerializer<T : GeneratorNode>(
+    private val createNode: (Surrogate) -> T,
+    private val `class`: KClass<T>,
+) : KSerializer<T> {
     @Serializable
     data class Surrogate(
         val uuid: NodeUUID,
         val laserOutputUUID: ConnectorUUID,
         val parametersUUIDs: List<ConnectorUUID>,
-        val internalParametersValues: Map<ConnectorUUID, Float>
+        val internalParametersValues: Map<ConnectorUUID, Float>,
     )
 
-    override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
+    override val descriptor: SerialDescriptor
+        get() = SerialDescriptor(
+            `class`.simpleName!!,
+            Surrogate.serializer().descriptor
+        )
 
     override fun serialize(encoder: Encoder, value: T) {
         encoder.encodeSerializableValue(Surrogate.serializer(), Surrogate(

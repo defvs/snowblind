@@ -9,10 +9,14 @@ import javafx.scene.layout.HBox
 import nodes.NodeParameter
 
 abstract class NodeParameterControl {
-    lateinit var parameter: NodeParameter.ControllableParameter
+    var parameter: NodeParameter.ControllableParameter? = null
+        set(value) {
+            field = value
+            if (value != null) this.value.set(value.defaultValue)
+        }
 
     protected abstract val control: Node
-    open var value: FloatProperty = SimpleFloatProperty(parameter.defaultValue)
+    open var value: FloatProperty = SimpleFloatProperty()
 
     abstract fun initControl(): Node
 }
@@ -32,9 +36,9 @@ class TestControl : NodeParameterControl() {
 
     override fun initControl(): Node {
         control = HBox(
-            Label(parameter.name),
+            Label(parameter!!.name),
             Label("").apply {
-                textProperty() bindTo value with parameter.valueConverter
+                textProperty() bindTo value with parameter!!.valueConverter
             }.also { valueLabel = it },
         )
         return control

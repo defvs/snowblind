@@ -44,9 +44,9 @@ class MacroNode(
     }
 
     var macroNumber
-        get() = (parameters[0] as NodeParameter.ControllableParameter.InternalParameter).value.toInt()
+        get() = (parameters[1] as NodeParameter.ControllableParameter.InternalParameter).value.toInt()
         set(value) {
-            (parameters[0] as NodeParameter.ControllableParameter.InternalParameter).value = value.toFloat()
+            (parameters[1] as NodeParameter.ControllableParameter.InternalParameter).value = value.toFloat()
         }
 
     init {

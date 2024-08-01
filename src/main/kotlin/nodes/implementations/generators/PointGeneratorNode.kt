@@ -18,8 +18,8 @@ import nodes.parameters
 class PointGeneratorNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
-    existingUUIDs: List<ConnectorUUID>,
-    existingValues: Map<ConnectorUUID, Float>,
+    existingUUIDs: List<ConnectorUUID>? = null,
+    existingValues: Map<ConnectorUUID, Float>? = null,
 ) : GeneratorNode {
 
     override val name: String = "Point Generator"
@@ -59,8 +59,8 @@ class PointGeneratorNode(
             control = EmptyControl()
         )
 
-        withExistingUUIDs(existingUUIDs)
-        withExistingValues(existingValues)
+        existingUUIDs?.let { withExistingUUIDs(it) }
+        existingValues?.let { withExistingValues(it) }
     }
 
     override fun computeLaser(inputParameters: Map<ConnectorUUID, Float>): List<LaserObject> {
@@ -88,4 +88,4 @@ class PointGeneratorNodeSerializer : GeneratorNodeSerializer<PointGeneratorNode>
         it.parametersUUIDs,
         it.internalParametersValues
     )
-})
+}, PointGeneratorNode::class)

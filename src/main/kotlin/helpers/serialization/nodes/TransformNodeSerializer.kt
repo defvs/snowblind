@@ -2,6 +2,7 @@ package helpers.serialization.nodes
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -9,8 +10,13 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import nodes.NodeParameter
 import nodes.TransformNode
+import kotlin.reflect.KClass
 
-abstract class TransformNodeSerializer<T : TransformNode>(private val createNode: (Surrogate) -> T) : KSerializer<T> {
+@OptIn(ExperimentalSerializationApi::class)
+abstract class TransformNodeSerializer<T : TransformNode>(
+    private val createNode: (Surrogate) -> T,
+    private val `class`: KClass<T>,
+) : KSerializer<T> {
     @Serializable
     data class Surrogate(
         val uuid: NodeUUID,
@@ -20,7 +26,11 @@ abstract class TransformNodeSerializer<T : TransformNode>(private val createNode
         val internalParametersValues: Map<ConnectorUUID, Float>,
     )
 
-    override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
+    override val descriptor: SerialDescriptor
+        get() = SerialDescriptor(
+            `class`.simpleName!!,
+            GeneratorNodeSerializer.Surrogate.serializer().descriptor
+        )
 
     override fun serialize(encoder: Encoder, value: T) {
         encoder.encodeSerializableValue(Surrogate.serializer(), Surrogate(

@@ -18,8 +18,8 @@ class HSVShiftNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val laserInputUUID: ConnectorUUID = ConnectorUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
-    existingUUIDs: List<ConnectorUUID>,
-    existingValues: Map<ConnectorUUID, Float>,
+    existingUUIDs: List<ConnectorUUID>? = null,
+    existingValues: Map<ConnectorUUID, Float>? = null,
 ) : TransformNode {
 
     override val name = "HSV Shift"
@@ -47,8 +47,8 @@ class HSVShiftNode(
             control = EmptyControl()
         )
 
-        withExistingUUIDs(existingUUIDs)
-        withExistingValues(existingValues)
+        existingUUIDs?.let { withExistingUUIDs(it) }
+        existingValues?.let { withExistingValues(it) }
     }
 
     override fun transformLaser(
@@ -76,4 +76,4 @@ class HSVShiftNodeSerializer : TransformNodeSerializer<HSVShiftNode>({
         it.parametersUUIDs,
         it.internalParametersValues
     )
-})
+}, HSVShiftNode::class)
