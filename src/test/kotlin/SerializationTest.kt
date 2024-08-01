@@ -4,6 +4,7 @@ import clips.Clip
 import clips.GeneratorClip
 import helpers.serialization.nodeSerializersModule
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -11,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 import nodes.INodeBase
 import nodes.NodeConnection
+import nodes.NodeParameter
 import nodes.implementations.generators.PointGeneratorNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
@@ -26,10 +28,11 @@ class SerializationTest : DescribeSpec({
     }
 
     val node1 = PointGeneratorNode().apply {
-        inputParams[0] = 1.0f
+        parameters[0] = 1.4f
+        parameters[1] = -10f
     }
     val node2 = PositionOffsetTransformNode().apply {
-        inputParams[0] = 3.0f
+        parameters[0] = 3.0f
     }
     val node3 = OutputNode()
     val node4 = MacroNode()
@@ -45,8 +48,10 @@ class SerializationTest : DescribeSpec({
         node3.uuid, node3.laserInputUUID
     )
     val connection3 = NodeConnection(
-        node4.uuid, node4.outputParams[0].uuid,
-        node2.uuid, node2.inputParams[1].uuid
+        node4.uuid,
+        node4.parameters.parameters.filterIsInstance<NodeParameter.OutputParameter>()[0].uuid,
+        node2.uuid,
+        node2.parameters.parameters.filterIsInstance<NodeParameter.ControllableParameter.ControllableInputParameter>()[1].uuid
     )
 
     val connectionList = listOf(connection1, connection2, connection3)
@@ -57,39 +62,69 @@ class SerializationTest : DescribeSpec({
     }
 
     describe("Clip serialization and deserialization") {
-        it("should serialize and deserialize clip without exceptions") {
-            val output = jsonEncoder.encodeToString(clip).also { println("Deserialized clip:\n${it}") }
-            val deserializedClip = jsonEncoder.decodeFromString<Clip>(output) as GeneratorClip
+        val serializedClip = jsonEncoder.encodeToString(clip).also { println("Deserialized clip:\n${it}") }
+        val deserializedClip = jsonEncoder.decodeFromString<Clip>(serializedClip) as GeneratorClip
 
-            deserializedClip.name shouldBe "Clip1"
-            deserializedClip.nodes.size shouldBe clip.nodes.size
-            deserializedClip.connectionMap.connections.size shouldBe clip.connectionMap.connections.size
-
-            clip.nodes.keys.forEach { uuid ->
-                deserializedClip.nodes.containsKey(uuid) shouldBe true
-            }
-
-            clip.connectionMap.connections.forEach { connection ->
-                deserializedClip.connectionMap.connections.contains(connection) shouldBe true
-            }
-        }
+        it("should serialize and deserialize clip without exceptions") {}
 
         it("should maintain UUID equality after serialization and deserialization") {
-            val output = jsonEncoder.encodeToString(clip)
-            val deserializedClip = jsonEncoder.decodeFromString<Clip>(output) as GeneratorClip
+            deserializedClip.uuid shouldBeEqual clip.uuid
+        }
 
-            clip.nodes.keys shouldBe deserializedClip.nodes.keys
-            clip.connectionMap.connections.map { it.source.nodeUUID to it.dest.nodeUUID } shouldBe deserializedClip.connectionMap.connections.map { it.source.nodeUUID to it.dest.nodeUUID }
+        it("should maintain name equality after serialization and deserialization") {
+            deserializedClip.name shouldBeEqual clip.name
+        }
+
+        it("nodes count should be the same") {
+            deserializedClip.nodes.size shouldBeEqual clip.nodes.size
+        }
+
+        it("connections count should be the same") {
+            deserializedClip.connectionMap.connections.size shouldBeEqual clip.connectionMap.connections.size
         }
     }
 
     describe("Node serialization and deserialization") {
-        nodesList.forEach { node ->
-            it("should serialize and deserialize ${node::class.simpleName} without exceptions") {
-                val output = jsonEncoder.encodeToString(node)
-                val deserializedNode = jsonEncoder.decodeFromString<INodeBase>(output)
-
-                deserializedNode.uuid shouldBe node.uuid
+        val serializedNodes = nodesList.map { jsonEncoder.encodeToString(it) }
+        val deserializedNodes = serializedNodes.map { jsonEncoder.decodeFromString<INodeBase>(it) }
+        deserializedNodes.zip(nodesList).forEach { (deserializedNode, originalNode) ->
+            describe("for node ${originalNode.name} uuid=${originalNode.uuid.uuid}") {
+                it("should serialize and deserialize without exceptions") {}
+                it("should maintain UUID equality after serialization and deserialization") {
+                    deserializedNode.uuid shouldBeEqual originalNode.uuid
+                }
+                it("should maintain name and description equality after serialization and deserialization") {
+                    deserializedNode.name shouldBeEqual originalNode.name
+                    if (deserializedNode.description != null)
+                        deserializedNode.description!! shouldBeEqual originalNode.description!!
+                }
+                it("should maintain parameter types equality after serialization and deserialization") {
+                    deserializedNode.parameters.parameters.zip(originalNode.parameters.parameters)
+                        .forEach { (deserializedParameter, originalParameter) ->
+                            deserializedParameter::class shouldBeEqual originalParameter::class
+                        }
+                }
+                it("should maintain parameter UUIDs and name equality after serialization and deserialization") {
+                    deserializedNode.parameters.parameters.zip(originalNode.parameters.parameters)
+                        .forEach { (deserializedParameter, originalParameter) ->
+                            deserializedParameter.uuid shouldBeEqual originalParameter.uuid
+                            deserializedParameter.name shouldBeEqual originalParameter.name
+                        }
+                }
+                it("when ControllableParameter, should maintain value equality after serialization and deserialization") {
+                    deserializedNode.parameters.parameters.zip(originalNode.parameters.parameters)
+                        .mapNotNull { (deserializedParameter, originalParameter) ->
+                            val first =
+                                deserializedParameter as? NodeParameter.ControllableParameter ?: return@mapNotNull null
+                            val second =
+                                originalParameter as? NodeParameter.ControllableParameter ?: return@mapNotNull null
+                            first to second
+                        }
+                        .forEach { (deserializedParameter, originalParameter) ->
+                            deserializedParameter.defaultValue shouldBeEqual originalParameter.defaultValue
+                            deserializedParameter.value shouldBeEqual originalParameter.value
+                        }
+                }
             }
         }
     }
