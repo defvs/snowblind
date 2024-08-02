@@ -1,5 +1,10 @@
 package helpers
 
+import javafx.beans.binding.Bindings
+import javafx.beans.property.FloatProperty
+import javafx.beans.property.StringProperty
+import nodes.helpers.ReadableValueConverter
+
 fun <T, U, V> Iterable<T>.zipTriple(other1: Iterable<U>, other2: Iterable<V>): ArrayList<Triple<T, U, V>> {
     val first = iterator()
     val second = other1.iterator()
@@ -16,3 +21,22 @@ fun <T, U, V> Iterable<T>.zipTriple(other1: Iterable<U>, other2: Iterable<V>): A
     }
     return list
 }
+
+fun <T> MutableList<T>.replaceAllIndexed(transform: (index: Int, source: T) -> T) {
+    for (i in this.indices) {
+        this[i] = transform(i, this[i])
+    }
+}
+
+class LabelTextPropertyBinder(private val stringProperty: StringProperty, private val value: FloatProperty) {
+    infix fun with(valueConverter: ReadableValueConverter) {
+        stringProperty.bind(
+            Bindings.createStringBinding(
+                { valueConverter(value.get()) }, value
+            )
+        )
+
+    }
+}
+
+infix fun StringProperty.bindTo(value: FloatProperty) = LabelTextPropertyBinder(this, value)

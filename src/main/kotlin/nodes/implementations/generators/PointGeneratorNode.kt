@@ -3,102 +3,89 @@ package nodes.implementations.generators
 import com.github.ajalt.colormath.model.RGB
 import helpers.ConnectorUUID
 import helpers.NodeUUID
-import kotlinx.serialization.KSerializer
+import helpers.serialization.nodes.GeneratorNodeSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import laser.LaserObject
 import laser.Point
 import nodes.GeneratorNode
-import nodes.INodeHasInputParams
-import ui.nodes.controls.EmptyControl
+import nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
+import nodes.mapToInput
 import nodes.parameters
 
 @Serializable(with = PointGeneratorNodeSerializer::class)
 class PointGeneratorNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
-    inputParamValues: List<Float>? = null,
-) : GeneratorNode(
-    name = "Point Generator",
-    description = """
+    existingUUIDs: List<ConnectorUUID>? = null,
+    existingValues: Map<ConnectorUUID, Float>? = null,
+) : GeneratorNode {
+
+    override val name: String = "Point Generator"
+    override val description: String = """
         Generates a single point
-    """.trimIndent(),
-), INodeHasInputParams {
-    override val inputParams = parameters {
-        parameter(
+    """.trimIndent()
+
+    override val parameters = parameters {
+        internalControllable(
             name = "X",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl()
         )
-        parameter(
+        internalControllable(
             name = "Y",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl()
         )
-        parameter(
+        internalControllable(
             name = "Red",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl()
         )
-        parameter(
+        internalControllable(
             name = "Green",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl()
         )
-        parameter(
+        internalControllable(
             name = "Blue",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
             control = EmptyControl()
         )
+
+        existingUUIDs?.let { withExistingUUIDs(it) }
+        existingValues?.let { withExistingValues(it) }
     }
 
-    init {
-        if (inputParamValues != null)
-            inputParams.parameters.forEachIndexed { i, param -> param.data = inputParamValues[i] }
-    }
+    override fun computeLaser(inputParameters: Map<ConnectorUUID, Float>): List<LaserObject> {
+        val data = parameters.mapToInput(inputParameters)
 
-    override val laserOutput: List<LaserObject>
-        get() = listOf(
+        return listOf(
             LaserObject(
                 Point(
-                    inputParams[0],
-                    inputParams[1],
+                    data["X"]!!,
+                    data["Y"]!!,
                 ), RGB(
-                    inputParams[2],
-                    inputParams[3],
-                    inputParams[4],
+                    data["Red"]!!,
+                    data["Green"]!!,
+                    data["Blue"]!!,
                 )
             )
         )
+    }
 }
 
-class PointGeneratorNodeSerializer : KSerializer<PointGeneratorNode> {
-    @Serializable
-    private data class Surrogate(
-        val uuid: NodeUUID,
-        val laserOutputUUID: ConnectorUUID,
-        val parameterValues: List<Float>,
+class PointGeneratorNodeSerializer : GeneratorNodeSerializer<PointGeneratorNode>({
+    PointGeneratorNode(
+        it.uuid,
+        it.laserOutputUUID,
+        it.parametersUUIDs,
+        it.internalParametersValues
     )
-
-    override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
-    override fun serialize(encoder: Encoder, value: PointGeneratorNode) =
-        encoder.encodeSerializableValue(Surrogate.serializer(), Surrogate(
-            value.uuid,
-            value.laserOutputUUID,
-            value.inputParams.parameters.map { it.data }
-        ))
-
-    override fun deserialize(decoder: Decoder) =
-        decoder.decodeSerializableValue(Surrogate.serializer()).let { (uuid, laserOutputUUID, parameterValues) ->
-            PointGeneratorNode(uuid, laserOutputUUID, parameterValues)
-        }
-}
+}, PointGeneratorNode::class)

@@ -2,7 +2,6 @@ package nodes
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
-import kotlinx.serialization.Serializable
 import laser.LaserObject
 
 /**
@@ -12,69 +11,44 @@ interface INodeBase {
     val name: String
     val description: String?
     val uuid: NodeUUID
-}
-
-/**
- * Interface for nodes with input parameters.
- */
-interface INodeHasInputParams {
-    val inputParams: NodeParameterMap
-}
-
-/**
- * Interface for nodes with output parameters.
- */
-interface INodeHasOutputParams {
-    val outputParams: NodeParameterMap
-}
-
-interface INodeHasInternalParams {
-    val internalParams: NodeParameterMap
-}
-
-/**
- * Interface for nodes with laser input.
- */
-interface INodeHasInputLaser {
-    val laserInputUUID: ConnectorUUID
-}
-
-/**
- * Interface for nodes with laser output.
- */
-interface INodeHasOutputLaser {
-    val laserOutputUUID: ConnectorUUID
+    val parameters: NodeParameterMap
 }
 
 /**
  * Abstract class representing a generator node.
  */
-@Serializable
-abstract class GeneratorNode(
-    override val name: String,
-    override val description: String? = null,
-) : INodeBase, INodeHasOutputLaser {
-    abstract val laserOutput: List<LaserObject>
+interface GeneratorNode : INodeBase {
+    override val name: String
+    override val description: String?
+    val laserOutputUUID: ConnectorUUID
+    fun computeLaser(
+        inputParameters: Map<ConnectorUUID, Float>,
+    ): List<LaserObject>
 }
 
 /**
  * Abstract class representing a transform node.
  */
-@Serializable
-abstract class TransformNode(
-    override val name: String,
-    override val description: String? = null,
-) : INodeBase, INodeHasInputLaser, INodeHasOutputLaser {
-    abstract fun processLaser(input: List<LaserObject>): List<LaserObject>
+interface TransformNode : INodeBase {
+    val laserInputUUID: ConnectorUUID
+    val laserOutputUUID: ConnectorUUID
+    fun transformLaser(
+        inputLaser: List<LaserObject>,
+        inputParameters: Map<ConnectorUUID, Float>,
+    ): List<LaserObject>
 }
 
 /**
  * Abstract class representing a parameter transform node.
  */
-@Serializable
-abstract class ParameterTransformNode(
-    override val name: String,
-    override val description: String? = null,
-) : INodeBase, INodeHasInputParams, INodeHasOutputParams {
-    abstract fun processParameter()
+interface ParameterTransformNode : INodeBase {
+    fun processParameters(
+        inputParameters: Map<ConnectorUUID, Float>,
+    ): Map<ConnectorUUID, Float>
+}
+
+interface ParameterGeneratorNode : INodeBase {
+    fun computeParameter(
+        inputParameters: Map<ConnectorUUID, Float>,
+    ): Map<ConnectorUUID, Float>
 }
