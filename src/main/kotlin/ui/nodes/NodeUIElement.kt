@@ -11,30 +11,24 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import nodes.*
-import ui.nodes.controls.NodeParameterControl
+import nodes.implementations.special.InputNode
+import nodes.implementations.special.OutputNode
 
 class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
     var onHeaderMousePressed: (e: MouseEvent) -> Unit = {}
     var onHeaderMouseDragged: (e: MouseEvent) -> Unit = {}
 
     private val ioCircles: List<NodeUIElementCircle>
-    private val parameters: List<NodeParameterMap>
-
-    data class NodeIO(
-        val name: String,
-        val uuid: ConnectorUUID,
-        val connectorType: ConnectorType,
-    )
 
     init {
         val ioCircles = arrayListOf<NodeUIElementCircle>()
 
-        this.javaClass.getResource("/ui/nodeUIElement.css")?.toExternalForm()?.let { stylesheets += it }
-        this.styleClass.add("node-ui-element")
-        this.alignment = Pos.TOP_CENTER
-        this.spacing = 0.0
+        javaClass.getResource("/ui/nodeUIElement.css")?.toExternalForm()?.let { stylesheets += it }
+        styleClass.add("node-ui-element")
+        alignment = Pos.TOP_CENTER
+        spacing = 0.0
 
-        this.children += StackPane {
+        children += StackPane {
             alignment = Pos.CENTER
             isPickOnBounds = true // Makes the entire title container pickable
             id = IDs.NodeHeaderDragbox
@@ -42,11 +36,12 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
             setOnMousePressed { onHeaderMousePressed(it) }
             setOnMouseDragged { onHeaderMouseDragged(it) }
 
-            if (node is INodeHasInputLaser) {
+            if (node is TransformNode || node is OutputNode) {
+                val laserInputUUID = (node as? TransformNode)?.laserInputUUID ?: (node as OutputNode).laserInputUUID
                 NodeUIElementCircle(
                     5.0,
                     Color.RED,
-                    node.laserInputUUID,
+                    laserInputUUID,
                     node.uuid,
                     ConnectorType.LaserInput
                 ).apply {
@@ -63,11 +58,17 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
                 isMouseTransparent = true
             }
 
-            if (node is INodeHasOutputLaser) {
+            if (node is TransformNode || node is InputNode || node is GeneratorNode) {
+                val laserOutputUUID = when (node) {
+                    is TransformNode -> node.laserOutputUUID
+                    is InputNode -> node.laserOutputUUID
+                    is GeneratorNode -> node.laserOutputUUID
+                    else -> throw ClassCastException()
+                }
                 NodeUIElementCircle(
                     5.0,
                     Color.RED,
-                    node.laserOutputUUID,
+                    laserOutputUUID,
                     node.uuid,
                     ConnectorType.LaserOutput
                 ).apply {
@@ -80,60 +81,50 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
             }
         }
 
-        fun createParameterPane(
-            parameter: Triple<NodeParameterDefinition, NodeParameter, NodeParameterControl>,
-            type: ConnectorType?,
-        ) = parameter.let { (definition, param, control) ->
-            StackPane {
-                alignment = Pos.CENTER
-                padding = Insets(4.0, 8.0)
+        fun createParameterPane(parameter: NodeParameter) = StackPane {
+            alignment = Pos.CENTER
+            padding = Insets(4.0, 8.0)
 
-                if (type == ConnectorType.ParameterInput)
-                    children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
-                        .apply {
-                            StackPane.setAlignment(this, Pos.CENTER_LEFT)
-                            translateX -= 8.0 + 5.0
-                        }
-                        .also { ioCircles += it }
-                children += control.createControl(param.data, definition)
-                if (type == ConnectorType.ParameterOutput)
-                    children += NodeUIElementCircle(5.0, Color.GREEN, param.uuid, node.uuid, type)
-                        .apply {
-                            StackPane.setAlignment(this, Pos.CENTER_RIGHT)
-                            translateX += 8.0 + 5.0
-                        }
-                        .also { ioCircles += it }
+            if (parameter is NodeParameter.ControllableParameter) children += parameter.initControl()
+
+            when (parameter) {
+                is NodeParameter.InputParameter,
+                is NodeParameter.ControllableParameter.ControllableInputParameter,
+                -> children.addFirst(
+                    NodeUIElementCircle(
+                        5.0,
+                        Color.GREEN,
+                        parameter.uuid,
+                        node.uuid,
+                        ConnectorType.ParameterInput
+                    ).apply {
+                        StackPane.setAlignment(this, Pos.CENTER_LEFT)
+                        translateX -= 8.0 + 5.0
+                    }.also { ioCircles += it }
+                )
+
+                is NodeParameter.OutputParameter -> children.addLast(
+                    NodeUIElementCircle(
+                        5.0,
+                        Color.RED,
+                        parameter.uuid,
+                        node.uuid,
+                        ConnectorType.ParameterOutput
+                    ).apply {
+                        StackPane.setAlignment(this, Pos.CENTER_RIGHT)
+                        translateX += 8.0 + 5.0
+                    }.also { ioCircles += it }
+                )
+
+                else -> Unit
             }
         }
 
-        val parameterHBox = VBox {}
+        val parameterVBox = VBox {
+            children.addAll(node.parameters.parameters.map(::createParameterPane))
+        }
 
-        parameters = listOfNotNull(
-            (node as? INodeHasInternalParams)?.internalParams
-                ?.also {
-                    it.flatten().map { param -> parameterHBox.children += createParameterPane(param, null) }
-                },
-            (node as? INodeHasInputParams)?.inputParams
-                ?.also {
-                    it.flatten().map { param ->
-                        parameterHBox.children += createParameterPane(
-                            param,
-                            ConnectorType.ParameterInput
-                        )
-                    }
-                },
-            (node as? INodeHasOutputParams)?.outputParams
-                ?.also {
-                    it.flatten().map { param ->
-                        parameterHBox.children += createParameterPane(
-                            param,
-                            ConnectorType.ParameterOutput
-                        )
-                    }
-                },
-        )
-
-        this.children += parameterHBox
+        children += parameterVBox
         this.ioCircles = ioCircles
     }
 
