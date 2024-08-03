@@ -5,18 +5,18 @@ import javafx.stage.Stage
 import nodes.implementations.generators.PointGeneratorNode
 import nodes.implementations.transforms.HSVShiftNode
 import nodes.implementations.transforms.PositionOffsetTransformNode
-import ui.nodes.NodeCompositorPane
+import ui.editor.EditorPane
 
 class ExampleApp : Application() {
 
     override fun start(primaryStage: Stage) {
 
-        val draggablePane = NodeCompositorPane(GeneratorClip())
+        val draggablePane = EditorPane(GeneratorClip())
         listOf(
             HSVShiftNode(),
             PositionOffsetTransformNode(),
             PointGeneratorNode(),
-        ).forEach(draggablePane::addNode)
+        ).forEach(draggablePane.nodeCompositor::addNode)
 
         val scene = Scene(draggablePane, 800.0, 600.0)
 

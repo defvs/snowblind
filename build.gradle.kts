@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "2.0.0"
     application
@@ -110,6 +112,12 @@ dependencies {
     // DriftFX
     implementation("org.eclipse.fx", "org.eclipse.fx.drift", "1.0.0")
 
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-receivers")
+    }
 }
 
 tasks.withType<Test> {
