@@ -1,15 +1,20 @@
 package ui.editor
 
 import clips.Clip
-import javafx.scene.layout.BorderPane
-import ui.nodes.NodeCompositorPane
+import javafx.scene.control.SplitPane
 
-class EditorPane(clip: Clip) : BorderPane() {
-    val nodeCompositor: NodeCompositorPane = NodeCompositorPane(clip)
+class EditorPane(clip: Clip) : SplitPane() {
+    val nodeCompositor = NodeCompositorPane(clip)
     val nodeSelector = NodeSelectorPane(nodeCompositor)
 
     init {
-        left = nodeSelector
-        center = nodeCompositor
+        items.addAll(
+            nodeSelector.apply {
+                minWidth = 180.0
+                maxWidth = 300.0
+            },
+            nodeCompositor
+        )
+        setDividerPositions(0.3)
     }
 }
