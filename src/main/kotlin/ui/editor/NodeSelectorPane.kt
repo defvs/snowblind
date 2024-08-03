@@ -4,12 +4,10 @@ import helpers.AllNodes
 import javafx.beans.property.ReadOnlyDoubleProperty
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
-import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.text.Font
 import nodes.INodeBase
-import ui.nodes.NodeCompositorPane
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -21,7 +19,7 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
                     font = Font(font.size * 1.1)
                     isUnderline = true
                     isWrapText = true
-                    maxWidthProperty().bind(maxWidth)
+                    prefWidthProperty().bind(maxWidth.subtract(12))
                 }
             }
         }
@@ -31,12 +29,14 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
                 val exampleNode = forClass.createInstance()
                 this.children += Label(exampleNode.name).apply {
                     font = Font(font.size * 1.2)
+                    isWrapText = true
+                    prefWidthProperty().bind(maxWidth.subtract(12))
                 }
                 exampleNode.description?.let {
                     this.children += Label(it).apply {
                         font = Font(font.size * 0.9)
                         isWrapText = true
-                        maxWidthProperty().bind(maxWidth)
+                        prefWidthProperty().bind(maxWidth.subtract(12))
                     }
                 }
             }
