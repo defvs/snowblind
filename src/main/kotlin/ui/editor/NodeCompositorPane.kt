@@ -172,6 +172,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     private fun disconnectNodes(connectorUUID: ConnectorUUID) =
         disconnectNodes(connections.first { connectorUUID in it.connection })
 
+    private fun disconnectNode(nodeUUID: NodeUUID) =
+        disconnectNodes(connections.first { nodeUUID in it.connection })
+
     private fun createConnectionLine(connection: NodeConnection): LineConnector {
         val sourceConnector = getNode(connection.source.nodeUUID)!!.getConnectorCircle(connection.source.connectorUUID)
         val destinationConnector = getNode(connection.dest.nodeUUID)!!.getConnectorCircle(connection.dest.connectorUUID)
@@ -204,10 +207,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
 
     fun removeNode(uuid: NodeUUID) {
         val nodeToRemove = getNode(uuid) ?: return
-        // Remove all connections related to this node
-        connections.filter { it.connection.source.nodeUUID == uuid || it.connection.dest.nodeUUID == uuid }
-            .forEach { disconnectNodes(it) }
-        // Remove the node
+        disconnectNode(uuid)
         clip.nodes.remove(uuid)
         this.children.remove(nodeToRemove)
     }

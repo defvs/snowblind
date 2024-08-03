@@ -34,6 +34,9 @@ data class NodeConnection(
 
     operator fun contains(connectorUUID: ConnectorUUID) =
         source.connectorUUID == connectorUUID || dest.connectorUUID == connectorUUID
+
+    operator fun contains(nodeUUID: NodeUUID) =
+        source.nodeUUID == nodeUUID || dest.nodeUUID == nodeUUID
 }
 
 /**
