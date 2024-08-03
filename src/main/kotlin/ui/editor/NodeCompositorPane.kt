@@ -1,4 +1,4 @@
-package ui.nodes
+package ui.editor
 
 import clips.Clip
 import helpers.ConnectorUUID
@@ -8,8 +8,11 @@ import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import nodes.INodeBase
 import nodes.NodeConnection
+import ui.nodes.*
 
 class NodeCompositorPane(private val clip: Clip) : Pane() {
     private val connections = mutableListOf<LineConnector>()
@@ -57,11 +60,16 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderDragged(event: MouseEvent) {
+        fun stayInBoundsX(x: Double) = x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
+        fun stayInBoundsY(y: Double) = y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
+
         val node = event.target as? Node ?: return
         if (node.id == IDs.NodeHeaderDragbox) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
-            parentNodeUI.layoutX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
-            parentNodeUI.layoutY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
+            val newX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
+            val newY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
+            parentNodeUI.layoutX = stayInBoundsX(newX)
+            parentNodeUI.layoutY = stayInBoundsY(newY)
         }
     }
     // endregion
@@ -177,15 +185,35 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
         node.createUIElement().apply {
             onHeaderMousePressed = ::onNodeHeaderPressed
             onHeaderMouseDragged = ::onNodeHeaderDragged
+
+            layoutX = ((this@NodeCompositorPane.width - this.boundsInParent.width) / 2).coerceAtLeast(0.0)
+            layoutY = ((this@NodeCompositorPane.height - this.boundsInParent.height) / 2).coerceAtLeast(0.0)
+
+            // Set up context menu on node header
+            val contextMenu = ContextMenu()
+            val deleteItem = MenuItem("Delete")
+            deleteItem.setOnAction {
+                removeNode(this.uuid)
+            }
+            contextMenu.items.add(deleteItem)
+            this.setOnContextMenuRequested { event ->
+                contextMenu.show(this, event.screenX, event.screenY)
+            }
         }.let { this.children.add(it) }
     }
 
     fun removeNode(uuid: NodeUUID) {
+        val nodeToRemove = getNode(uuid) ?: return
+        // Remove all connections related to this node
+        connections.filter { it.connection.source.nodeUUID == uuid || it.connection.dest.nodeUUID == uuid }
+            .forEach { disconnectNodes(it) }
+        // Remove the node
         clip.nodes.remove(uuid)
-        this.children.removeIf { (it as? NodeUIElement)?.uuid == uuid }
+        this.children.remove(nodeToRemove)
     }
 
     private fun getNode(uuid: NodeUUID) = this.children.find { (it as? NodeUIElement)?.uuid == uuid } as? NodeUIElement
+
     // endregion
 }
 
