@@ -5,11 +5,11 @@ import helpers.ConnectorUUID
 import helpers.NodeUUID
 import helpers.findParent
 import javafx.scene.Node
+import javafx.scene.control.ContextMenu
+import javafx.scene.control.MenuItem
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
-import javafx.scene.control.ContextMenu
-import javafx.scene.control.MenuItem
 import nodes.INodeBase
 import nodes.NodeConnection
 import ui.nodes.*
@@ -60,8 +60,11 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderDragged(event: MouseEvent) {
-        fun stayInBoundsX(x: Double) = x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
-        fun stayInBoundsY(y: Double) = y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
+        fun stayInBoundsX(x: Double) =
+            x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
+
+        fun stayInBoundsY(y: Double) =
+            y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
 
         val node = event.target as? Node ?: return
         if (node.id == IDs.NodeHeaderDragbox) {
@@ -98,14 +101,16 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
                 NodeConnectorDragContext.sourceConnector = newNode
                 temporaryConnectionLine.apply {
                     isVisible = true
-                    newNode.localToScene(newNode.centerX, newNode.centerY).let {
-                        startX = it.x
-                        startY = it.y
-                        endX = event.sceneX
-                        endY = event.sceneY
-                    }
+                    val start =
+                        this@NodeCompositorPane.sceneToLocal(newNode.localToScene(newNode.centerX, newNode.centerY))
+                    startX = start.x
+                    startY = start.y
+                    val end = this@NodeCompositorPane.sceneToLocal(event.sceneX, event.sceneY)
+                    endX = end.x
+                    endY = end.y
                 }
             }
+
             else -> return
         }
     }
@@ -113,8 +118,9 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     private fun onMouseDragged(event: MouseEvent) {
         if (NodeConnectorDragContext.sourceConnector != null) {
             temporaryConnectionLine.apply {
-                endX = event.sceneX
-                endY = event.sceneY
+                val end = this@NodeCompositorPane.sceneToLocal(event.sceneX, event.sceneY)
+                endX = end.x
+                endY = end.y
             }
         }
     }
@@ -172,13 +178,13 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     private fun disconnectNodes(connectorUUID: ConnectorUUID) =
         disconnectNodes(connections.first { connectorUUID in it.connection })
 
-    private fun disconnectNode(nodeUUID: NodeUUID) =
+    private fun disconnectNodes(nodeUUID: NodeUUID) =
         disconnectNodes(connections.first { nodeUUID in it.connection })
 
     private fun createConnectionLine(connection: NodeConnection): LineConnector {
         val sourceConnector = getNode(connection.source.nodeUUID)!!.getConnectorCircle(connection.source.connectorUUID)
         val destinationConnector = getNode(connection.dest.nodeUUID)!!.getConnectorCircle(connection.dest.connectorUUID)
-        return LineConnector(sourceConnector, destinationConnector, connection)
+        return LineConnector(sourceConnector, destinationConnector, connection, this)
     }
     // endregion
 
@@ -207,7 +213,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
 
     fun removeNode(uuid: NodeUUID) {
         val nodeToRemove = getNode(uuid) ?: return
-        disconnectNode(uuid)
+        disconnectNodes(uuid)
         clip.nodes.remove(uuid)
         this.children.remove(nodeToRemove)
     }
