@@ -1,7 +1,7 @@
 package nodes
 
 import helpers.ConnectorUUID
-import nodes.controls.NodeParameterControl
+import ui.nodes.controls.NodeParameterControl
 import nodes.helpers.ReadableValueConverter
 
 typealias ParameterCompute = (Map<ConnectorUUID, Float>) -> Float

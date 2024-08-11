@@ -6,11 +6,12 @@ import helpers.serialization.nodes.TransformNodeSerializer
 import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.TransformNode
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.mapToInput
 import nodes.parameters
+import ui.nodes.controls.SliderControl
 
 @Serializable(with = PositionOffsetTransformNodeSerializer::class)
 class PositionOffsetTransformNode(
@@ -31,31 +32,31 @@ class PositionOffsetTransformNode(
             name = "X Offset",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Y Offset",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Rotation",
             range = SimpleValueRanges.rotation,
             valueConverter = SimpleValueConverters.asDegrees,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Rotation X Anchor",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Rotation Y Anchor",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
 
         existingUUIDs?.let { withExistingUUIDs(it) }

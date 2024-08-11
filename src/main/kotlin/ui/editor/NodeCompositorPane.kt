@@ -205,9 +205,10 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
                 removeNode(this.uuid)
             }
             contextMenu.items.add(deleteItem)
-            this.setOnContextMenuRequested { event ->
-                contextMenu.show(this, event.screenX, event.screenY)
-            }
+            this.children.single { it.id == IDs.NodeHeaderDragbox }
+                .setOnContextMenuRequested { event ->
+                    contextMenu.show(this, event.screenX, event.screenY)
+                }
         }.let { this.children.add(it) }
     }
 

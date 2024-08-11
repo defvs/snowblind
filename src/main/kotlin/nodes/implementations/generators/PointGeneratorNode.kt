@@ -8,11 +8,12 @@ import kotlinx.serialization.Serializable
 import laser.LaserObject
 import laser.Point
 import nodes.GeneratorNode
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.mapToInput
 import nodes.parameters
+import ui.nodes.controls.SliderControl
 
 @Serializable(with = PointGeneratorNodeSerializer::class)
 class PointGeneratorNode(
@@ -32,31 +33,31 @@ class PointGeneratorNode(
             name = "X",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Y",
             range = SimpleValueRanges.position,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Red",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Green",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
         internalControllable(
             name = "Blue",
             range = SimpleValueRanges.color,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl()
+            control = SliderControl()
         )
 
         existingUUIDs?.let { withExistingUUIDs(it) }

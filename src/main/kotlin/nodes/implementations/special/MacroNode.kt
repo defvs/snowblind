@@ -8,8 +8,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import nodes.*
-import nodes.controls.EmptyControl
+import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
+import ui.nodes.controls.SliderControl
 
 @Serializable(with = MacroNodeSerializer::class)
 class MacroNode(
@@ -37,7 +38,7 @@ class MacroNode(
             name = "Macro Number",
             range = 1f..32f,
             valueConverter = SimpleValueConverters.asInteger,
-            control = EmptyControl(),
+            control = SliderControl(),
             defaultValue = macroNumber.toFloat(),
             uuid = macroNumberUUID,
         )
