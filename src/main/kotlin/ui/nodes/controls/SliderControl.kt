@@ -74,6 +74,7 @@ class SliderControl : NodeParameterControl() {
         fun endEdit() {
             parent.children[2] = valueLabel
             field.text.toFloatOrNull()?.let { value.set(it) }
+            parameter!!.valueConverter.fromString(field.text)?.let { value.set(it) }
         }
 
         field.focusedProperty().addListener { _, _, newValue ->

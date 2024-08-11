@@ -37,7 +37,7 @@ class MacroNode(
         internal(
             name = "Macro Number",
             range = 1f..32f,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl(),
             defaultValue = macroNumber.toFloat(),
             uuid = macroNumberUUID,

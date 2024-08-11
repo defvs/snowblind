@@ -32,31 +32,31 @@ class PointGeneratorNode(
         internalControllable(
             name = "X",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
         internalControllable(
             name = "Y",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
         internalControllable(
             name = "Red",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
         internalControllable(
             name = "Green",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
         internalControllable(
             name = "Blue",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
 

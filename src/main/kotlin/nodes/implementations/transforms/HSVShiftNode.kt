@@ -32,19 +32,19 @@ class HSVShiftNode(
         internalControllable(
             name = "Hue Shift",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.as8bitColor,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
         internalControllable(
             name = "Saturation Shift",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.as8bitColor,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
         internalControllable(
             name = "Lightness Shift",
             range = SimpleValueRanges.color,
-            valueConverter = SimpleValueConverters.as8bitColor,
+            valueConverter = SimpleValueConverters.As8bitColor,
             control = SliderControl()
         )
 

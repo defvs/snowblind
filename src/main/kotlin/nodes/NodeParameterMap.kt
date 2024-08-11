@@ -2,8 +2,8 @@ package nodes
 
 import helpers.ConnectorUUID
 import helpers.replaceAllIndexed
+import nodes.helpers.ValueConverter
 import ui.nodes.controls.NodeParameterControl
-import nodes.helpers.ReadableValueConverter
 
 class NodeParameterMap(
     vararg parameters: NodeParameter,
@@ -37,7 +37,7 @@ class NodeParameterMapBuilder {
         name: String,
         uuid: ConnectorUUID = ConnectorUUID(),
         range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter,
+        valueConverter: ValueConverter,
         control: NodeParameterControl,
         defaultValue: Float = 0f,
     ) = parameters.add(
@@ -50,7 +50,7 @@ class NodeParameterMapBuilder {
         name: String,
         uuid: ConnectorUUID = ConnectorUUID(),
         range: ClosedFloatingPointRange<Float>,
-        valueConverter: ReadableValueConverter,
+        valueConverter: ValueConverter,
         control: NodeParameterControl,
         defaultValue: Float = 0f,
     ) = parameters.add(

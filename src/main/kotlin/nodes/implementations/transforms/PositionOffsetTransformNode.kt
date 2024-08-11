@@ -6,7 +6,6 @@ import helpers.serialization.nodes.TransformNodeSerializer
 import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.TransformNode
-import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.mapToInput
@@ -31,31 +30,31 @@ class PositionOffsetTransformNode(
         internalControllable(
             name = "X Offset",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
         internalControllable(
             name = "Y Offset",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
         internalControllable(
             name = "Rotation",
             range = SimpleValueRanges.rotation,
-            valueConverter = SimpleValueConverters.asDegrees,
+            valueConverter = SimpleValueConverters.AsDegrees,
             control = SliderControl()
         )
         internalControllable(
             name = "Rotation X Anchor",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
         internalControllable(
             name = "Rotation Y Anchor",
             range = SimpleValueRanges.position,
-            valueConverter = SimpleValueConverters.asInteger,
+            valueConverter = SimpleValueConverters.AsInteger,
             control = SliderControl()
         )
 

@@ -1,8 +1,8 @@
 package nodes
 
 import helpers.ConnectorUUID
+import nodes.helpers.ValueConverter
 import ui.nodes.controls.NodeParameterControl
-import nodes.helpers.ReadableValueConverter
 
 typealias ParameterCompute = (Map<ConnectorUUID, Float>) -> Float
 
@@ -15,7 +15,7 @@ sealed interface NodeParameter {
     sealed class ControllableParameter : NodeParameter {
         abstract val defaultValue: Float
         abstract val range: ClosedFloatingPointRange<Float>
-        abstract val valueConverter: ReadableValueConverter
+        abstract val valueConverter: ValueConverter
         abstract val control: NodeParameterControl
 
         var value: Float
@@ -29,7 +29,7 @@ sealed interface NodeParameter {
             override val uuid: ConnectorUUID,
             override val name: String,
             override val range: ClosedFloatingPointRange<Float>,
-            override val valueConverter: ReadableValueConverter,
+            override val valueConverter: ValueConverter,
             override val control: NodeParameterControl,
             override val defaultValue: Float,
         ) : ControllableParameter() {
@@ -40,7 +40,7 @@ sealed interface NodeParameter {
             override val uuid: ConnectorUUID,
             override val name: String,
             override val range: ClosedFloatingPointRange<Float>,
-            override val valueConverter: ReadableValueConverter,
+            override val valueConverter: ValueConverter,
             override val control: NodeParameterControl,
             override val defaultValue: Float,
         ) : ControllableParameter() {
