@@ -87,7 +87,9 @@ class SliderControl : NodeParameterControl() {
         control = StackPane {
             children += HBox {
                 alignment = Pos.CENTER_LEFT
-                children += Label(parameter!!.name)
+                children += Label(parameter!!.name).also {
+                    minWidthProperty().bind(it.widthProperty().multiply(1.5))
+                }
                 children += Region().also {
                     setHgrow(it, Priority.ALWAYS)
                 }
