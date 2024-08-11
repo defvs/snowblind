@@ -3,7 +3,6 @@ package ui.nodes.controls
 import helpers.HBox
 import helpers.StackPane
 import helpers.bindTo
-import helpers.setHgrow
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.Node

@@ -87,7 +87,7 @@ class LaserObject(val laserPoints: List<LaserPoint>, val closedPolygon: Boolean)
 }
 
 /**
- * Enum representing the gradient type of a laser point.
+ * Enum representing the gradient type of laser point.
  */
 enum class GradientType {
     Smooth, Steps, None,

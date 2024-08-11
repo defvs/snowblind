@@ -31,7 +31,7 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
         children += StackPane {
             alignment = Pos.CENTER
             isPickOnBounds = true // Makes the entire title container pickable
-            id = IDs.NodeHeaderDragbox
+            id = IDs.NODE_HEADER_DRAGBOX
             padding = Insets(4.0, 8.0)
             setOnMousePressed { onHeaderMousePressed(it) }
             setOnMouseDragged { onHeaderMouseDragged(it) }

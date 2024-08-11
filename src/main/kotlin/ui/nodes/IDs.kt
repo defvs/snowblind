@@ -1,5 +1,5 @@
 package ui.nodes
 
 object IDs {
-    val NodeHeaderDragbox = "nodeDragbox"
+    const val NODE_HEADER_DRAGBOX = "nodeDragbox"
 }

@@ -8,7 +8,6 @@ import kotlinx.serialization.Serializable
 import laser.LaserObject
 import laser.Point
 import nodes.GeneratorNode
-import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.mapToInput

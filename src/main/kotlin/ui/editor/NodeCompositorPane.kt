@@ -47,7 +47,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
 
     private fun onNodeHeaderPressed(event: MouseEvent) {
         val node = event.target as? Node ?: return
-        if (node.id == IDs.NodeHeaderDragbox) {
+        if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
             this.children.front(parentNodeUI)
             NodeDragContext.apply {
@@ -67,7 +67,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
             y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
 
         val node = event.target as? Node ?: return
-        if (node.id == IDs.NodeHeaderDragbox) {
+        if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
             val newX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
             val newY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
@@ -205,7 +205,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
                 removeNode(this.uuid)
             }
             contextMenu.items.add(deleteItem)
-            this.children.single { it.id == IDs.NodeHeaderDragbox }
+            this.children.single { it.id == IDs.NODE_HEADER_DRAGBOX }
                 .setOnContextMenuRequested { event ->
                     contextMenu.show(this, event.screenX, event.screenY)
                 }

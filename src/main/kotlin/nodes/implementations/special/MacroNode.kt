@@ -1,15 +1,17 @@
 package nodes.implementations.special
 
-import helpers.NodeUUID
 import helpers.ConnectorUUID
+import helpers.NodeUUID
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import nodes.*
-import ui.nodes.controls.EmptyControl
+import nodes.INodeBase
+import nodes.NodeParameter
+import nodes.NodeParameterMap
 import nodes.helpers.SimpleValueConverters
+import nodes.parameters
 import ui.nodes.controls.SliderControl
 
 @Serializable(with = MacroNodeSerializer::class)

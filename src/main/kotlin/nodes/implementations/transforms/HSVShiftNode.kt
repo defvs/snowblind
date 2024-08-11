@@ -7,7 +7,6 @@ import helpers.serialization.nodes.TransformNodeSerializer
 import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.TransformNode
-import ui.nodes.controls.EmptyControl
 import nodes.helpers.SimpleValueConverters
 import nodes.helpers.SimpleValueRanges
 import nodes.mapToInput
