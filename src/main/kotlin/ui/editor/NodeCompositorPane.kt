@@ -179,7 +179,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
         disconnectNodes(connections.first { connectorUUID in it.connection })
 
     private fun disconnectNodes(nodeUUID: NodeUUID) =
-        disconnectNodes(connections.first { nodeUUID in it.connection })
+        connections.firstOrNull { nodeUUID in it.connection }?.let { disconnectNodes(it) }
 
     private fun createConnectionLine(connection: NodeConnection): LineConnector {
         val sourceConnector = getNode(connection.source.nodeUUID)!!.getConnectorCircle(connection.source.connectorUUID)
