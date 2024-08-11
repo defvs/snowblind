@@ -1,9 +1,6 @@
 package ui.nodes.controls
 
-import helpers.HBox
-import helpers.Insets
-import helpers.StackPane
-import helpers.bindTo
+import helpers.*
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -15,7 +12,6 @@ import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
-import javafx.scene.layout.HBox.setHgrow
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -90,8 +86,8 @@ class SliderControl : NodeParameterControl() {
                 children += Label(parameter!!.name).also {
                     minWidthProperty().bind(it.widthProperty().multiply(1.5))
                 }
-                children += Region().also {
-                    setHgrow(it, Priority.ALWAYS)
+                children += Region().apply {
+                    setHgrow(Priority.ALWAYS)
                 }
                 children += Label().apply {
                     textProperty() bindTo value with parameter!!.valueConverter
