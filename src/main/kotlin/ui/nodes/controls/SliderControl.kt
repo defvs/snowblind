@@ -19,7 +19,7 @@ import javafx.scene.shape.Rectangle
 import javafx.scene.text.Text
 
 class SliderControl : NodeParameterControl() {
-    class SliderControlSkin(slider: Slider) : SliderSkin(slider) {
+    private class SliderControlSkin(slider: Slider) : SliderSkin(slider) {
 
         private val trackBackground: Rectangle = Rectangle()
         private val fill: Rectangle = Rectangle()
