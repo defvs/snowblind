@@ -30,12 +30,6 @@ class MacroNode(
     """.trimIndent()
 
     override val parameters: NodeParameterMap = parameters {
-        output(
-            name = "Macro output",
-            uuid = macroOutputUUID,
-            compute = { throw Exception("compute run on output of MacroNode.") }
-        )
-
         internal(
             name = "Macro Number",
             range = 1f..32f,
@@ -43,6 +37,11 @@ class MacroNode(
             control = SliderControl(),
             defaultValue = macroNumber.toFloat(),
             uuid = macroNumberUUID,
+        )
+        output(
+            name = "Macro output",
+            uuid = macroOutputUUID,
+            compute = { throw Exception("compute run on output of MacroNode.") }
         )
     }
 

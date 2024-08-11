@@ -10,7 +10,10 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import nodes.*
+import nodes.GeneratorNode
+import nodes.INodeBase
+import nodes.NodeParameter
+import nodes.TransformNode
 import nodes.implementations.special.InputNode
 import nodes.implementations.special.OutputNode
 
@@ -106,7 +109,7 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
                 is NodeParameter.OutputParameter -> children.addLast(
                     NodeUIElementCircle(
                         5.0,
-                        Color.RED,
+                        Color.GREEN,
                         parameter.uuid,
                         node.uuid,
                         ConnectorType.ParameterOutput
