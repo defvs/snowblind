@@ -4,6 +4,7 @@ import helpers.HBox
 import helpers.StackPane
 import helpers.bindTo
 import helpers.setHgrow
+import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -16,6 +17,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.HBox.setHgrow
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import javafx.scene.text.Text
 
 class SliderControl : NodeParameterControl() {
     private lateinit var valueLabel: Label
@@ -26,9 +28,7 @@ class SliderControl : NodeParameterControl() {
         control = StackPane {
             children += HBox {
                 alignment = Pos.CENTER_LEFT
-                children += Label(parameter!!.name).apply {
-
-                }
+                children += Label(parameter!!.name)
                 children += Region().also {
                     setHgrow(it, Priority.ALWAYS)
                 }
@@ -47,15 +47,14 @@ class SliderControl : NodeParameterControl() {
                 addEventFilter(MouseEvent.ANY) { event ->
                     if (event.button == MouseButton.SECONDARY) {
                         if (event.eventType == MouseEvent.MOUSE_RELEASED) {
-                            startValueEdit()
+                            if (!isEditing) startValueEdit()
                         }
                         event.consume()
                     }
-                }
-
-                addEventFilter(MouseEvent.MOUSE_CLICKED) { event ->
                     if (event.isAltDown && event.button == MouseButton.PRIMARY) {
-                        value = 0.0
+                        if (event.eventType == MouseEvent.MOUSE_CLICKED)
+                            value = 0.0
+                        event.consume()
                     }
                 }
             }.also { slider = it }
@@ -65,16 +64,34 @@ class SliderControl : NodeParameterControl() {
         return control
     }
 
+    private var isEditing = false
+
     private fun startValueEdit() {
+        isEditing = true
         val parent = (valueLabel.parent as HBox)
         val field = TextField(valueLabel.textProperty().get())
+
+        // Create a Text node to measure the width of the text
+        val textNode = Text()
+        textNode.textProperty().bind(field.textProperty())
+
+        field.style = """
+            -fx-background-color: transparent;
+            -fx-border-color: transparent;
+            -fx-padding: 0;
+            -fx-text-fill: -fx-text-inner-color;
+        """
+        field.prefWidthProperty().bind(Bindings.createDoubleBinding({
+            textNode.layoutBounds.width + 10 // Add some padding for better appearance
+        }, textNode.layoutBoundsProperty()))
+
         parent.children[2] = field
         field.alignment = Pos.CENTER_RIGHT
 
         fun endEdit() {
             parent.children[2] = valueLabel
-            field.text.toFloatOrNull()?.let { value.set(it) }
             parameter!!.valueConverter.fromString(field.text)?.let { value.set(it) }
+            isEditing = false
         }
 
         field.focusedProperty().addListener { _, _, newValue ->
@@ -87,5 +104,6 @@ class SliderControl : NodeParameterControl() {
         }
 
         field.requestFocus()
+        field.selectAll()  // Select all text when editing starts
     }
 }
