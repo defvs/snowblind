@@ -201,6 +201,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
             val contextMenu = ContextMenu()
             val deleteItem = MenuItem("Delete")
             deleteItem.setOnAction {
+                this@NodeCompositorPane.clip.nodes.remove(this.uuid)
                 removeNode(this.uuid)
             }
             contextMenu.items.add(deleteItem)
