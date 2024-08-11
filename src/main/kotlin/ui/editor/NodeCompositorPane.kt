@@ -14,7 +14,7 @@ import nodes.INodeBase
 import nodes.NodeConnection
 import ui.nodes.*
 
-class NodeCompositorPane(private val clip: Clip) : Pane() {
+class NodeCompositorPane(val clip: Clip) : Pane() {
     private val connections = mutableListOf<LineConnector>()
     private val temporaryConnectionLine = Line().apply {
         isVisible = false
@@ -25,7 +25,7 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
 
     init {
         // Add clip nodes into view
-        clip.nodes.values.forEach { addNode(it.createUIElement()) }
+        clip.nodes.values.forEach { addNode(it) }
         // Add clip connections into view
         clip.connectionMap.connections.forEach { nodeConnection ->
             connections += createConnectionLine(nodeConnection).also { children.add(it) }
@@ -190,7 +190,6 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
 
     // region Node functions
     fun addNode(node: INodeBase) {
-        clip += node
         node.createUIElement().apply {
             onHeaderMousePressed = ::onNodeHeaderPressed
             onHeaderMouseDragged = ::onNodeHeaderDragged
@@ -215,7 +214,6 @@ class NodeCompositorPane(private val clip: Clip) : Pane() {
     fun removeNode(uuid: NodeUUID) {
         val nodeToRemove = getNode(uuid) ?: return
         disconnectNodes(uuid)
-        clip.nodes.remove(uuid)
         this.children.remove(nodeToRemove)
     }
 

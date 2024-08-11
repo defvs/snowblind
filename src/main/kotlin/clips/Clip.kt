@@ -19,12 +19,12 @@ sealed class Clip {
     /**
      * Name of the clip.
      */
-    abstract val name: String
+    abstract var name: String
 
     /**
      * Unique identifier for the clip.
      */
-    abstract val uuid: ClipUUID
+    abstract var uuid: ClipUUID
 
     /**
      * Map of nodes associated with the clip.
@@ -163,8 +163,8 @@ sealed class Clip {
  */
 @Serializable
 class GeneratorClip(
-    override val name: String = "Unnamed Generator Clip",
-    override val uuid: ClipUUID = ClipUUID(),
+    override var name: String = "Unnamed Generator Clip",
+    override var uuid: ClipUUID = ClipUUID(),
 ) : Clip()
 
 /**
@@ -172,8 +172,8 @@ class GeneratorClip(
  */
 @Serializable
 class EffectClip(
-    override val name: String = "Unnamed Generator Clip",
-    override val uuid: ClipUUID = ClipUUID(),
+    override var name: String = "Unnamed Generator Clip",
+    override var uuid: ClipUUID = ClipUUID(),
 ) : Clip() {
     /**
      * Processes the effect clip with the provided input laser objects.

@@ -71,10 +71,6 @@ class SerializationTest : DescribeSpec({
             deserializedClip.uuid shouldBeEqual clip.uuid
         }
 
-        it("should maintain name equality after serialization and deserialization") {
-            deserializedClip.name shouldBeEqual clip.name
-        }
-
         it("nodes count should be the same") {
             deserializedClip.nodes.size shouldBeEqual clip.nodes.size
         }

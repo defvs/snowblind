@@ -59,8 +59,9 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
             }
             setOnMouseClicked { event ->
                 if (event.clickCount == 2) {
-                    (selectionModel.selectedItem as? ListItem.Node)?.let {
-                        compositorPane.addNode(it.create())
+                    (selectionModel.selectedItem as? ListItem.Node)?.create()?.also { node ->
+                        compositorPane.clip += node
+                        compositorPane.addNode(node)
                     }
                 }
             }

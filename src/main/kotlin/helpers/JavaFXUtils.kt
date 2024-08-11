@@ -1,9 +1,12 @@
 package helpers
 
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.control.MenuItem
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
@@ -38,3 +41,7 @@ fun Insets(topbottom: Double, leftright: Double): Insets = Insets(topbottom, lef
 fun Node.setHgrow(priority: Priority) = HBox.setHgrow(this, priority)
 fun Node.setVgrow(priority: Priority) = VBox.setVgrow(this, priority)
 fun Node.setStackPaneAlignment(alignment: Pos) = StackPane.setAlignment(this, alignment)
+
+fun MenuItem(text: String, action: EventHandler<ActionEvent>) = MenuItem(text).apply {
+    onAction = action
+}
