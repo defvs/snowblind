@@ -1,6 +1,7 @@
 package ui.nodes.controls
 
 import helpers.HBox
+import helpers.Insets
 import helpers.StackPane
 import helpers.bindTo
 import javafx.beans.binding.Bindings
@@ -9,6 +10,7 @@ import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.Slider
 import javafx.scene.control.TextField
+import javafx.scene.control.skin.SliderSkin
 import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
@@ -16,9 +18,67 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.HBox.setHgrow
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
+import javafx.scene.paint.Color
+import javafx.scene.shape.Rectangle
 import javafx.scene.text.Text
 
 class SliderControl : NodeParameterControl() {
+    class SliderControlSkin(slider: Slider) : SliderSkin(slider) {
+
+        private val trackBackground: Rectangle = Rectangle()
+        private val fill: Rectangle = Rectangle()
+
+        init {
+            trackBackground.fill = Color.web("000", 0.1)
+            fill.fill = Color.web("000", 0.1)
+
+            // Set rounded corners
+            trackBackground.arcWidth = 10.0
+            trackBackground.arcHeight = 10.0
+            fill.arcWidth = 10.0
+            fill.arcHeight = 10.0
+
+            fill.isMouseTransparent = true
+
+            children.addAll(trackBackground, fill)
+
+            registerChangeListener(slider.valueProperty()) { updateFill() }
+            registerChangeListener(slider.minProperty()) { updateFill() }
+            registerChangeListener(slider.maxProperty()) { updateFill() }
+
+            // Add mouse event handlers
+            trackBackground.setOnMousePressed { event -> handleMouseEvent(event) }
+            trackBackground.setOnMouseDragged { event -> handleMouseEvent(event) }
+
+            // Bind the track height to the slider height
+            trackBackground.heightProperty().bind(slider.heightProperty())
+            fill.heightProperty().bind(slider.heightProperty())
+        }
+
+        override fun layoutChildren(x: Double, y: Double, w: Double, h: Double) {
+            trackBackground.width = w
+            trackBackground.relocate(x, y)
+            updateFill()
+        }
+
+        private fun updateFill() {
+            val slider = skinnable as Slider
+            val range = slider.max - slider.min
+            val proportion = (slider.value - slider.min) / range
+
+            fill.width = trackBackground.width * proportion
+            fill.relocate(trackBackground.layoutX, trackBackground.layoutY)
+        }
+
+        private fun handleMouseEvent(event: MouseEvent) {
+            val slider = skinnable as Slider
+            val mouseX = event.x
+            val trackWidth = trackBackground.width
+            val value = slider.min + (slider.max - slider.min) * (mouseX / trackWidth)
+            slider.value = value.coerceIn(slider.min, slider.max)
+        }
+    }
+
     private lateinit var valueLabel: Label
     private lateinit var slider: Slider
     override lateinit var control: Node
@@ -37,8 +97,12 @@ class SliderControl : NodeParameterControl() {
                 }.also { valueLabel = it }
 
                 isMouseTransparent = true
+
+                padding = Insets(0.0, 8.0)
             }
             children += Slider().apply {
+                skin = SliderControlSkin(this)
+
                 valueProperty().bindBidirectional(super.value)
                 min = parameter!!.range.start.toDouble()
                 max = parameter!!.range.endInclusive.toDouble()
