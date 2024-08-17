@@ -194,9 +194,6 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
             onHeaderMousePressed = ::onNodeHeaderPressed
             onHeaderMouseDragged = ::onNodeHeaderDragged
 
-            layoutX = ((this@NodeCompositorPane.width - this.boundsInParent.width) / 2).coerceAtLeast(0.0)
-            layoutY = ((this@NodeCompositorPane.height - this.boundsInParent.height) / 2).coerceAtLeast(0.0)
-
             // Set up context menu on node header
             val contextMenu = ContextMenu()
             val deleteItem = MenuItem("Delete")
