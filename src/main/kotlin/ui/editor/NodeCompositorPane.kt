@@ -172,7 +172,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     private fun disconnectNodes(line: LineConnector) {
         children -= line
         connections -= line
-        clip.connectionMap.removeConnection(line.connection)
+        clip.connectionMap.remove(line.connection)
     }
 
     private fun disconnectNodes(connectorUUID: ConnectorUUID) =

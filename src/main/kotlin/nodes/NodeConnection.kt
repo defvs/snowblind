@@ -3,6 +3,8 @@ package nodes
 import helpers.ConnectorUUID
 import helpers.NodeUUID
 import helpers.serialization.NodeConnectionMapSerializer
+import javafx.collections.FXCollections
+import javafx.collections.ObservableMap
 import kotlinx.serialization.Serializable
 
 /**
@@ -45,45 +47,30 @@ data class NodeConnection(
  * @property connections A collection of node connections.
  */
 @Serializable(with = NodeConnectionMapSerializer::class)
-class NodeConnectionMap(vararg connections: NodeConnection) {
-    private val connectionsByConnector = hashMapOf<ConnectorUUID, NodeConnection>()
+class NodeConnectionMap private constructor(
+    private val map: ObservableMap<ConnectorUUID, NodeConnection> = FXCollections.observableHashMap()
+) : ObservableMap<ConnectorUUID, NodeConnection> by map {
+    constructor(vararg connections: NodeConnection): this() {
+        connections.forEach(::add)
+    }
 
     val connections: Collection<NodeConnection>
-        get() = connectionsByConnector.values
+        get() = this.values
 
-    init {
-        connections.forEach(::addConnection)
+    fun add(connection: NodeConnection) {
+        this[connection.source.connectorUUID] = connection
+        this[connection.dest.connectorUUID] = connection
     }
+    operator fun plusAssign(connection: NodeConnection) = add(connection)
 
-    /**
-     * Adds a connection to the map.
-     *
-     * @param connection The connection to add.
-     */
-    fun addConnection(connection: NodeConnection) {
-        connectionsByConnector[connection.source.connectorUUID] = connection
-        connectionsByConnector[connection.dest.connectorUUID] = connection
-    }
+    override fun remove(key: ConnectorUUID) = this.values.firstOrNull {
+        it.dest.connectorUUID == key || it.source.connectorUUID == key
+    }?.also { this.values.remove(it) }
+    operator fun minusAssign(connector: ConnectorUUID) { remove(connector) }
 
-    operator fun plusAssign(connection: NodeConnection) = addConnection(connection)
-
-    /**
-     * Gets a connection by the connector UUID.
-     *
-     * @param connectorUUID The UUID of the connector.
-     * @return The connection associated with the connector, or null if none exists.
-     */
-    fun getConnectionByConnector(connectorUUID: ConnectorUUID): NodeConnection? {
-        return connectionsByConnector[connectorUUID]
+    fun remove(connection: NodeConnection) {
+        remove(connection.source.connectorUUID)
+        remove(connection.dest.connectorUUID)
     }
-
-    fun removeConnection(connectorUUID: ConnectorUUID) {
-        connectionsByConnector.values.removeIf {
-            it.dest.connectorUUID == connectorUUID || it.source.connectorUUID == connectorUUID
-        }
-    }
-    fun removeConnection(connection: NodeConnection) {
-        removeConnection(connection.source.connectorUUID)
-        removeConnection(connection.dest.connectorUUID)
-    }
+    operator fun minusAssign(connection: NodeConnection) = remove(connection)
 }
