@@ -20,55 +20,47 @@ class EditorWindow private constructor(private val clip: Clip) {
 
     fun createAndShow() {
         Platform.runLater {
-            val stage = Stage()
+            with (Stage()) {
 
-            val menuBar = MenuBar().apply {
-                menus += Menu("File", null,
-                    MenuItem("Save") { saveClip() },
-                    MenuItem("Save As") { stage.saveClipAs() },
-                    MenuItem("Cancel") { stage.closeWindow() }
-                )
-            }
+                val menuBar = MenuBar().apply {
+                    menus += Menu("File", null,
+                        MenuItem("Save") { saveClip() },
+                        MenuItem("Save As") { saveClipAs() },
+                        MenuItem("Cancel") { close() }
+                    )
+                }
 
-            val root = BorderPane().apply {
-                top = menuBar
-                center = editorPane
+                val root = BorderPane().apply {
+                    top = menuBar
+                    center = editorPane
+                }
+                scene = Scene(root, 800.0, 600.0)
+                titleProperty().bind(clip.name)
+                show()
             }
-            stage.scene = Scene(root, 800.0, 600.0)
-            stage.updateWindowTitle()
-            stage.show()
         }
     }
 
     private fun saveClip() {
-        File("${clip.name}.json").writeText(json.encodeToString<Clip>(clip))
+        File("${clip.name.value}.json").writeText(json.encodeToString<Clip>(clip))
     }
 
     private fun Stage.saveClipAs() {
         val fileChooser = FileChooser()
-        fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Files", "*.json"))
+        fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
         val selectedFile: File? = fileChooser.showSaveDialog(this)
         selectedFile?.let { file ->
-            clip.name = file.nameWithoutExtension
-            clip.uuid = ClipUUID()
-            this.updateWindowTitle()
+            clip.name.set(file.nameWithoutExtension)
+            clip.uuid.set(ClipUUID())
             saveClip()
         }
-    }
-
-    private fun Stage.closeWindow() {
-        close()
-    }
-
-    private fun Stage.updateWindowTitle() {
-        title = clip.name
     }
 
     companion object {
         fun openFromFile() {
             Platform.runLater {
                 val fileChooser = FileChooser()
-                fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Files", "*.json"))
+                fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
                 val selectedFile: File? = fileChooser.showOpenDialog(null)
                 selectedFile?.let { file ->
                     val clip = json.decodeFromString<Clip>(file.readText())
