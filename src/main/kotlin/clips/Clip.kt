@@ -15,7 +15,7 @@ import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
-import javafx.collections.FXCollections
+import javafx.collections.FXCollections.observableHashMap
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
@@ -44,7 +44,7 @@ sealed class Clip {
      * Map of nodes associated with the clip.
      */
     @Serializable(with = ObservableMapSerializer::class)
-    val nodes = FXCollections.observableHashMap<NodeUUID, INodeBase>()!!
+    val nodes = observableHashMap<NodeUUID, INodeBase>()!!
 
     /**
      * Map of connections between nodes.
