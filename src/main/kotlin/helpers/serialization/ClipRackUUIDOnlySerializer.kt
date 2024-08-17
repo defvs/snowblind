@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-class ClipRackUUIDOnlySerializer : KSerializer<ClipRack> {
+object ClipRackUUIDOnlySerializer : KSerializer<ClipRack> {
     @Serializable
     private class ClipRackDelegate(
         val name: String,
@@ -26,8 +26,8 @@ class ClipRackUUIDOnlySerializer : KSerializer<ClipRack> {
         constructor(clipRack: ClipRack) : this(
             clipRack.name,
             clipRack.uuid,
-            clipRack.generatorClips.map { it?.uuid }.toTypedArray(),
-            clipRack.effectClips.map { it?.uuid }.toTypedArray()
+            clipRack.generatorClips.map { it?.uuid?.value }.toTypedArray(),
+            clipRack.effectClips.map { it?.uuid?.value }.toTypedArray()
         )
     }
 
