@@ -41,7 +41,10 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
                 }
             }
 
-            fun create() = forClass.createInstance()
+            fun create(compositorPane: NodeCompositorPane) = forClass.createInstance().apply {
+                position.first.set((compositorPane.width.toFloat() / 2).coerceAtLeast(0f))
+                position.second.set((compositorPane.height.toFloat() / 2).coerceAtLeast(0f))
+            }
         }
     }
 
@@ -59,7 +62,7 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
             }
             setOnMouseClicked { event ->
                 if (event.clickCount == 2) {
-                    (selectionModel.selectedItem as? ListItem.Node)?.create()?.also { node ->
+                    (selectionModel.selectedItem as? ListItem.Node)?.create(compositorPane)?.also { node ->
                         compositorPane.clip += node
                         compositorPane.addNode(node)
                     }
