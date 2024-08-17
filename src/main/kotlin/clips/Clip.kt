@@ -1,10 +1,24 @@
+@file:UseSerializers(
+    StringPropertySerializer::class,
+    ObjectPropertySerializer::class,
+)
+
 package clips
 
 import helpers.ClipUUID
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.serialization.javafx.ObjectPropertySerializer
+import helpers.serialization.javafx.ObservableMapSerializer
+import helpers.serialization.javafx.StringPropertySerializer
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
+import javafx.collections.FXCollections
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.UseSerializers
 import laser.LaserObject
 import nodes.*
 import nodes.implementations.special.InputNode
@@ -19,17 +33,18 @@ sealed class Clip {
     /**
      * Name of the clip.
      */
-    abstract var name: String
+    abstract val name: StringProperty
 
     /**
      * Unique identifier for the clip.
      */
-    abstract var uuid: ClipUUID
+    val uuid: ObjectProperty<ClipUUID> = SimpleObjectProperty(ClipUUID())
 
     /**
      * Map of nodes associated with the clip.
      */
-    val nodes = hashMapOf<NodeUUID, INodeBase>()
+    @Serializable(with = ObservableMapSerializer::class)
+    val nodes = FXCollections.observableHashMap<NodeUUID, INodeBase>()!!
 
     /**
      * Map of connections between nodes.
@@ -55,7 +70,7 @@ sealed class Clip {
      * @param connection The connection to add.
      */
     operator fun plusAssign(connection: NodeConnection) {
-        connectionMap.addConnection(connection)
+        connectionMap.add(connection)
     }
 
     private fun processParameterNode(nodeUUID: NodeUUID) =
@@ -72,7 +87,7 @@ sealed class Clip {
         val allParameters = node.parameters.parameters.associate { parameter ->
             parameter.uuid to when (parameter) {
                 is NodeParameter.InputParameter, is NodeParameter.ControllableParameter.ControllableInputParameter -> {
-                    connectionMap.getConnectionByConnector(parameter.uuid)?.let {
+                    connectionMap[parameter.uuid]?.let {
                         paramsCache[it.source.connectorUUID] ?: processParameterNode(
                             it.source.nodeUUID
                         )[it.source.connectorUUID]
@@ -96,7 +111,7 @@ sealed class Clip {
         laserOutputCache[node.uuid]?.let { return it }
 
         val output = when (node) {
-            is OutputNode -> connectionMap.getConnectionByConnector(node.laserInputUUID)
+            is OutputNode -> connectionMap[node.laserInputUUID]
                 ?.let { processLaserNode(it.source.nodeUUID) } ?: emptyList()
 
             is InputNode -> throw Exception("Got into the InputNode branch without finding it in cache.")
@@ -105,7 +120,7 @@ sealed class Clip {
                 processParameterNode(node)
             )
 
-            is TransformNode -> connectionMap.getConnectionByConnector(node.laserInputUUID)?.source?.nodeUUID
+            is TransformNode -> connectionMap[node.laserInputUUID]?.source?.nodeUUID
                 ?.let {
                     node.transformLaser(
                         processLaserNode(it),
@@ -137,7 +152,7 @@ sealed class Clip {
         }
 
         for (outputNode in outputNodes) {
-            val inputConnection = connectionMap.getConnectionByConnector(outputNode.laserInputUUID)
+            val inputConnection = connectionMap[outputNode.laserInputUUID]
             val inputNode = inputConnection?.source?.nodeUUID?.let { nodes[it] }
             if (inputNode != null) {
                 laserObjects.addAll(processLaserNode(inputNode))
@@ -163,8 +178,7 @@ sealed class Clip {
  */
 @Serializable
 class GeneratorClip(
-    override var name: String = "Unnamed Generator Clip",
-    override var uuid: ClipUUID = ClipUUID(),
+    override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
 ) : Clip()
 
 /**
@@ -172,8 +186,7 @@ class GeneratorClip(
  */
 @Serializable
 class EffectClip(
-    override var name: String = "Unnamed Generator Clip",
-    override var uuid: ClipUUID = ClipUUID(),
+    override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
 ) : Clip() {
     /**
      * Processes the effect clip with the provided input laser objects.
