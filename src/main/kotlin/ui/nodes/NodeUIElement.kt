@@ -26,6 +26,9 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
     init {
         val ioCircles = arrayListOf<NodeUIElementCircle>()
 
+        layoutXProperty().bindBidirectional(node.position.first)
+        layoutYProperty().bindBidirectional(node.position.second)
+
         javaClass.getResource("/ui/nodeUIElement.css")?.toExternalForm()?.let { stylesheets += it }
         styleClass.add("node-ui-element")
         alignment = Pos.TOP_CENTER

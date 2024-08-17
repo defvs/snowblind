@@ -68,7 +68,7 @@ class SerializationTest : DescribeSpec({
         it("should serialize and deserialize clip without exceptions") {}
 
         it("should maintain UUID equality after serialization and deserialization") {
-            deserializedClip.uuid shouldBeEqual clip.uuid
+            deserializedClip.uuid.value shouldBeEqual clip.uuid.value
         }
 
         it("nodes count should be the same") {

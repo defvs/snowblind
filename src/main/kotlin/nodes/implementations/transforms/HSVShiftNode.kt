@@ -3,6 +3,7 @@ package nodes.implementations.transforms
 import com.github.ajalt.colormath.model.HSL
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.ObservablePosition
 import helpers.serialization.nodes.TransformNodeSerializer
 import kotlinx.serialization.Serializable
 import laser.LaserObject
@@ -20,6 +21,7 @@ class HSVShiftNode(
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
     existingUUIDs: List<ConnectorUUID>? = null,
     existingValues: Map<ConnectorUUID, Float>? = null,
+    override val position: ObservablePosition = ObservablePosition(),
 ) : TransformNode {
 
     override val name = "HSV Shift"
@@ -74,6 +76,7 @@ class HSVShiftNodeSerializer : TransformNodeSerializer<HSVShiftNode>({
         it.laserInputUUID,
         it.laserOutputUUID,
         it.parametersUUIDs,
-        it.internalParametersValues
+        it.internalParametersValues,
+        it.position
     )
 }, HSVShiftNode::class)

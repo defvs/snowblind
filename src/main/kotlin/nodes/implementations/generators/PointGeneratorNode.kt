@@ -1,10 +1,17 @@
+@file:UseSerializers(
+    FloatPropertySerializer::class
+)
+
 package nodes.implementations.generators
 
 import com.github.ajalt.colormath.model.RGB
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.ObservablePosition
+import helpers.serialization.javafx.FloatPropertySerializer
 import helpers.serialization.nodes.GeneratorNodeSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import laser.LaserObject
 import laser.Point
 import nodes.GeneratorNode
@@ -14,12 +21,14 @@ import nodes.mapToInput
 import nodes.parameters
 import ui.nodes.controls.SliderControl
 
+
 @Serializable(with = PointGeneratorNodeSerializer::class)
 class PointGeneratorNode(
     override val uuid: NodeUUID = NodeUUID(),
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
     existingUUIDs: List<ConnectorUUID>? = null,
     existingValues: Map<ConnectorUUID, Float>? = null,
+    override val position: ObservablePosition = ObservablePosition(),
 ) : GeneratorNode {
 
     override val name: String = "Point Generator"
@@ -86,6 +95,7 @@ class PointGeneratorNodeSerializer : GeneratorNodeSerializer<PointGeneratorNode>
         it.uuid,
         it.laserOutputUUID,
         it.parametersUUIDs,
-        it.internalParametersValues
+        it.internalParametersValues,
+        it.position
     )
 }, PointGeneratorNode::class)

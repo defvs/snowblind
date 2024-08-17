@@ -1,8 +1,11 @@
 package helpers
 
+import helpers.serialization.javafx.FloatPropertySerializer
 import javafx.beans.binding.Bindings
 import javafx.beans.property.FloatProperty
+import javafx.beans.property.SimpleFloatProperty
 import javafx.beans.property.StringProperty
+import kotlinx.serialization.Serializable
 import nodes.helpers.ValueConverter
 
 fun <T, U, V> Iterable<T>.zipTriple(other1: Iterable<U>, other2: Iterable<V>): ArrayList<Triple<T, U, V>> {
@@ -40,3 +43,10 @@ class LabelTextPropertyBinder(private val stringProperty: StringProperty, privat
 }
 
 infix fun StringProperty.bindTo(value: FloatProperty) = LabelTextPropertyBinder(this, value)
+
+typealias ObservablePosition = Pair<
+        @Serializable(FloatPropertySerializer::class) FloatProperty,
+        @Serializable(FloatPropertySerializer::class) FloatProperty
+        >
+
+fun ObservablePosition() = Pair(SimpleFloatProperty(0f), SimpleFloatProperty(0f))

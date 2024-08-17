@@ -1,6 +1,7 @@
 @file:UseSerializers(
     StringPropertySerializer::class,
     ObjectPropertySerializer::class,
+    FloatPropertySerializer::class,
 )
 
 package clips
@@ -8,6 +9,7 @@ package clips
 import helpers.ClipUUID
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.serialization.javafx.FloatPropertySerializer
 import helpers.serialization.javafx.ObjectPropertySerializer
 import helpers.serialization.javafx.ObservableMapSerializer
 import helpers.serialization.javafx.StringPropertySerializer
@@ -179,7 +181,9 @@ sealed class Clip {
 @Serializable
 class GeneratorClip(
     override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
-) : Clip()
+) : Clip() {
+    constructor(name: String) : this(SimpleStringProperty(name))
+}
 
 /**
  * Class representing an effect clip.
@@ -188,6 +192,8 @@ class GeneratorClip(
 class EffectClip(
     override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
 ) : Clip() {
+    constructor(name: String) : this(SimpleStringProperty(name))
+    
     /**
      * Processes the effect clip with the provided input laser objects.
      *

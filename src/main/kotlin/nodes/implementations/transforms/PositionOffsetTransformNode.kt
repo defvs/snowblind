@@ -2,7 +2,9 @@ package nodes.implementations.transforms
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.ObservablePosition
 import helpers.serialization.nodes.TransformNodeSerializer
+import javafx.beans.property.FloatProperty
 import kotlinx.serialization.Serializable
 import laser.LaserObject
 import nodes.TransformNode
@@ -19,6 +21,7 @@ class PositionOffsetTransformNode(
     override val laserOutputUUID: ConnectorUUID = ConnectorUUID(),
     existingUUIDs: List<ConnectorUUID>? = null,
     existingValues: Map<ConnectorUUID, Float>? = null,
+    override val position: Pair<FloatProperty, FloatProperty> = ObservablePosition(),
 ) : TransformNode {
 
     override val name = "Position Offset"
@@ -89,6 +92,7 @@ class PositionOffsetTransformNodeSerializer : TransformNodeSerializer<PositionOf
         it.laserInputUUID,
         it.laserOutputUUID,
         it.parametersUUIDs,
-        it.internalParametersValues
+        it.internalParametersValues,
+        it.position
     )
 }, PositionOffsetTransformNode::class)

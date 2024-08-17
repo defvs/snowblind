@@ -2,6 +2,7 @@ package nodes.implementations.special
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.ObservablePosition
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -22,6 +23,8 @@ class MacroNode(
 
     macroNumberUUID: ConnectorUUID = ConnectorUUID(),
     macroNumber: Int = 1,
+
+    override val position: ObservablePosition = ObservablePosition(),
 ) : INodeBase {
 
     override val name = "Macro Node"
@@ -64,21 +67,23 @@ class MacroNodeSerializer : KSerializer<MacroNode> {
         val outputUUID: ConnectorUUID,
         val macroNumberUUID: ConnectorUUID,
         val macroNumber: Int,
+        val position: ObservablePosition,
     )
 
     override val descriptor: SerialDescriptor get() = Surrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: MacroNode) = encoder.encodeSerializableValue(
         Surrogate.serializer(),
-        Surrogate(value.uuid, value.parameters[0].uuid, value.parameters[1].uuid, value.macroNumber)
+        Surrogate(value.uuid, value.parameters[1].uuid, value.parameters[0].uuid, value.macroNumber, value.position)
     )
 
     override fun deserialize(decoder: Decoder) = decoder.decodeSerializableValue(Surrogate.serializer())
-        .let { (uuid, outputUUID, macroNumberUUID, macroNumber) ->
+        .let { (uuid, outputUUID, macroNumberUUID, macroNumber, position) ->
             MacroNode(
                 uuid,
                 outputUUID,
                 macroNumberUUID,
-                macroNumber
+                macroNumber,
+                position
             )
         }
 }

@@ -2,6 +2,7 @@ package nodes
 
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.ObservablePosition
 import laser.LaserObject
 
 /**
@@ -12,14 +13,13 @@ interface INodeBase {
     val description: String?
     val uuid: NodeUUID
     val parameters: NodeParameterMap
+    val position: ObservablePosition
 }
 
 /**
  * Abstract class representing a generator node.
  */
 interface GeneratorNode : INodeBase {
-    override val name: String
-    override val description: String?
     val laserOutputUUID: ConnectorUUID
     fun computeLaser(
         inputParameters: Map<ConnectorUUID, Float>,

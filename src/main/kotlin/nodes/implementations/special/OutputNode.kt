@@ -1,7 +1,8 @@
 package nodes.implementations.special
 
-import helpers.NodeUUID
 import helpers.ConnectorUUID
+import helpers.NodeUUID
+import helpers.ObservablePosition
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import nodes.INodeBase
@@ -12,6 +13,7 @@ import nodes.parameters
 class OutputNode(
     override val uuid: NodeUUID = NodeUUID(),
     val laserInputUUID: ConnectorUUID = ConnectorUUID(),
+    override val position: ObservablePosition = ObservablePosition(),
 ) : INodeBase {
 
     override val name = "Laser Output"
