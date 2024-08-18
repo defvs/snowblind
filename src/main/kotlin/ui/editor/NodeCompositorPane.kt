@@ -4,6 +4,8 @@ import clips.Clip
 import helpers.ConnectorUUID
 import helpers.NodeUUID
 import helpers.findParent
+import helpers.front
+import javafx.collections.MapChangeListener
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -15,7 +17,7 @@ import nodes.NodeConnection
 import ui.nodes.*
 
 class NodeCompositorPane(val clip: Clip) : Pane() {
-    private val connections = mutableListOf<LineConnector>()
+    private val connections = hashSetOf<LineConnector>()
     private val temporaryConnectionLine = Line().apply {
         isVisible = false
         strokeDashArray.add(16.0) // Dashed line
@@ -24,13 +26,32 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     }
 
     init {
-        // Add clip nodes into view
-        clip.nodes.values.forEach { addNode(it) }
-        // Add clip connections into view
-        clip.connectionMap.connections.forEach { nodeConnection ->
-            connections += createConnectionLine(nodeConnection).also { children.add(it) }
-            connections += createConnectionLine(nodeConnection).also { children.add(it) }
+        // Setup binding from clip.nodes
+        clip.nodes.addListener { change: MapChangeListener.Change<out NodeUUID, out INodeBase> ->
+            when {
+                change.wasAdded() -> addNode(change.valueAdded)
+                change.wasRemoved() -> removeNode(change.key)
+            }
         }
+        // Initialize
+        clip.nodes.forEach { (_, value) ->
+            addNode(value)
+        }
+
+        // Setup binding from clip.connectionMap
+        clip.connectionMap.addListener { change: MapChangeListener.Change<out ConnectorUUID, out NodeConnection> ->
+            if (change.wasAdded())
+                connections.add(LineConnector(change.valueAdded, this).also { children += it })
+            if (change.wasRemoved()) {
+                connections.removeIf { it.connection == change.valueRemoved }
+                children.removeIf { it is LineConnector && it.connection == change.valueRemoved }
+            }
+        }
+        // Initialize
+        clip.connectionMap.forEach { (_, value) ->
+            connections.add(LineConnector(value, this).also { children += it })
+        }
+
         children.add(temporaryConnectionLine)
         setOnMousePressed { onMousePressed(it) }
         setOnMouseDragged { onMouseDragged(it) }
@@ -77,7 +98,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     }
     // endregion
 
-    // region Mouse events
+    // region Connectors connection logic
     private object NodeConnectorDragContext {
         var sourceNode: NodeUUID? = null
         var sourceConnector: NodeUIElementCircle? = null
@@ -135,7 +156,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                 if (NodeConnectorDragContext.sourceConnector!!.connectorUUID == node.connectorUUID) return
                 if (NodeConnectorDragContext.sourceConnector!!.connectorType.opposite != node.connectorType) return
 
-                connectNodes(
+                clip.connectionMap +=
                     if (!NodeConnectorDragContext.sourceConnector!!.connectorType.isInput)
                         NodeConnection(
                             NodeConnectorDragContext.sourceNode!!,
@@ -150,7 +171,6 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                             NodeConnectorDragContext.sourceNode!!,
                             NodeConnectorDragContext.sourceConnector!!.connectorUUID
                         )
-                )
             }
 
             else -> {}
@@ -161,31 +181,13 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     // endregion
 
     // region Node Connection functions
-    private fun connectNodes(nodeConnection: NodeConnection) {
-        createConnectionLine(nodeConnection).let {
-            children += it
-            connections += it
-        }
-        clip.connectionMap += nodeConnection
-    }
-
-    private fun disconnectNodes(line: LineConnector) {
-        children -= line
-        connections -= line
-        clip.connectionMap.remove(line.connection)
-    }
+    private fun disconnectNodes(line: LineConnector) = clip.connectionMap.remove(line.connection)
 
     private fun disconnectNodes(connectorUUID: ConnectorUUID) =
         disconnectNodes(connections.first { connectorUUID in it.connection })
 
     private fun disconnectNodes(nodeUUID: NodeUUID) =
         connections.firstOrNull { nodeUUID in it.connection }?.let { disconnectNodes(it) }
-
-    private fun createConnectionLine(connection: NodeConnection): LineConnector {
-        val sourceConnector = getNode(connection.source.nodeUUID)!!.getConnectorCircle(connection.source.connectorUUID)
-        val destinationConnector = getNode(connection.dest.nodeUUID)!!.getConnectorCircle(connection.dest.connectorUUID)
-        return LineConnector(sourceConnector, destinationConnector, connection, this)
-    }
     // endregion
 
     // region Node functions
@@ -215,12 +217,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         this.children.remove(nodeToRemove)
     }
 
-    private fun getNode(uuid: NodeUUID) = this.children.find { (it as? NodeUIElement)?.uuid == uuid } as? NodeUIElement
+    fun getNode(uuid: NodeUUID) = this.children.find { (it as? NodeUIElement)?.uuid == uuid } as? NodeUIElement
 
     // endregion
-}
-
-private fun <E> MutableList<E>.front(node: E) {
-    this.remove(node)
-    this.add(node)
 }

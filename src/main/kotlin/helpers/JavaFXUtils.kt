@@ -45,3 +45,8 @@ fun Node.setStackPaneAlignment(alignment: Pos) = StackPane.setAlignment(this, al
 fun MenuItem(text: String, action: EventHandler<ActionEvent>) = MenuItem(text).apply {
     onAction = action
 }
+
+fun <E> MutableList<E>.front(node: E) {
+    this.remove(node)
+    this.add(node)
+}
