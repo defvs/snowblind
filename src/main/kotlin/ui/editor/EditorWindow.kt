@@ -3,12 +3,15 @@ package ui.editor
 import clips.Clip
 import clips.GeneratorClip
 import helpers.ClipUUID
-import helpers.MenuItem
 import helpers.serialization.json
 import javafx.application.Platform
 import javafx.scene.Scene
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
+import javafx.scene.control.MenuItem
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCodeCombination
+import javafx.scene.input.KeyCombination
 import javafx.scene.layout.BorderPane
 import javafx.stage.FileChooser
 import javafx.stage.Stage
@@ -20,13 +23,23 @@ class EditorWindow private constructor(private val clip: Clip) {
 
     fun createAndShow() {
         Platform.runLater {
-            with (Stage()) {
+            with(Stage()) {
 
                 val menuBar = MenuBar().apply {
                     menus += Menu("File", null,
-                        MenuItem("Save") { saveClip() },
-                        MenuItem("Save As") { saveClipAs() },
-                        MenuItem("Cancel") { close() }
+                        MenuItem("Save").apply {
+                            accelerator = KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
+                            setOnAction { saveClip() }
+                        },
+                        MenuItem("Save As").apply {
+                            accelerator =
+                                KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN)
+                            setOnAction { saveClipAs() }
+                        },
+                        MenuItem("Close").apply {
+                            accelerator = KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN)
+                            setOnAction { close() }
+                        }
                     )
                 }
 
