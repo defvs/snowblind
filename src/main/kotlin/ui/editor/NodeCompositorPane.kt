@@ -5,6 +5,7 @@ import helpers.ConnectorUUID
 import helpers.NodeUUID
 import helpers.findParent
 import helpers.front
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.MapChangeListener
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
@@ -25,6 +26,8 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         viewOrder = -100.0
     }
 
+    val hasUnsavedChanges = SimpleBooleanProperty(false)
+
     init {
         // Setup binding from clip.nodes
         clip.nodes.addListener { change: MapChangeListener.Change<out NodeUUID, out INodeBase> ->
@@ -32,6 +35,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                 change.wasAdded() -> addNode(change.valueAdded)
                 change.wasRemoved() -> removeNode(change.key)
             }
+            hasUnsavedChanges.set(true)
         }
         // Initialize
         clip.nodes.forEach { (_, value) ->
@@ -46,6 +50,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                 connections.removeIf { it.connection == change.valueRemoved }
                 children.removeIf { it is LineConnector && it.connection == change.valueRemoved }
             }
+            hasUnsavedChanges.set(true)
         }
         // Initialize
         clip.connectionMap.forEach { (_, value) ->

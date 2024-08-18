@@ -4,8 +4,8 @@ import clips.Clip
 import javafx.scene.control.SplitPane
 
 class EditorPane(clip: Clip) : SplitPane() {
-    private val nodeCompositor = NodeCompositorPane(clip)
-    private val nodeSelector = NodeSelectorPane(nodeCompositor)
+    val nodeCompositor = NodeCompositorPane(clip)
+    val nodeSelector = NodeSelectorPane(nodeCompositor)
 
     init {
         items.addAll(

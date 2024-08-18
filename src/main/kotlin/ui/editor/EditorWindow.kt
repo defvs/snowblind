@@ -5,6 +5,7 @@ import clips.GeneratorClip
 import helpers.ClipUUID
 import helpers.serialization.json
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
 import javafx.scene.Scene
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
@@ -18,13 +19,14 @@ import javafx.stage.Stage
 import kotlinx.serialization.encodeToString
 import java.io.File
 
-class EditorWindow private constructor(private val clip: Clip) {
+class EditorWindow private constructor(private val clip: Clip, private var initiallyEmpty: Boolean = false) {
     private val editorPane = EditorPane(clip)
+    private lateinit var stage: Stage
 
     fun createAndShow() {
         Platform.runLater {
-            with(Stage()) {
-
+            stage = Stage()
+            with(stage) {
                 val menuBar = MenuBar().apply {
                     menus += Menu("File", null,
                         MenuItem("Save").apply {
@@ -47,21 +49,34 @@ class EditorWindow private constructor(private val clip: Clip) {
                     top = menuBar
                     center = editorPane
                 }
+
                 scene = Scene(root, 800.0, 600.0)
-                titleProperty().bind(clip.name)
+
+                titleProperty().bind(Bindings.createStringBinding({
+                    if (editorPane.nodeCompositor.hasUnsavedChanges.get()) "• ${clip.name.value}" else clip.name.value
+                }, clip.name, editorPane.nodeCompositor.hasUnsavedChanges))
+
                 show()
+
+                if (initiallyEmpty)
+                    editorPane.nodeCompositor.hasUnsavedChanges.set(true)
             }
         }
     }
 
     private fun saveClip() {
+        if (initiallyEmpty) {
+            initiallyEmpty = false
+            return saveClipAs()
+        }
         File("${clip.name.value}.json").writeText(json.encodeToString<Clip>(clip))
+        editorPane.nodeCompositor.hasUnsavedChanges.set(false)
     }
 
-    private fun Stage.saveClipAs() {
+    private fun saveClipAs() {
         val fileChooser = FileChooser()
         fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
-        val selectedFile: File? = fileChooser.showSaveDialog(this)
+        val selectedFile: File? = fileChooser.showSaveDialog(stage)
         selectedFile?.let { file ->
             clip.name.set(file.nameWithoutExtension)
             clip.uuid.set(ClipUUID())
@@ -87,7 +102,7 @@ class EditorWindow private constructor(private val clip: Clip) {
         }
 
         fun createEmpty() {
-            EditorWindow(GeneratorClip()).createAndShow()
+            EditorWindow(GeneratorClip(), initiallyEmpty = true).createAndShow()
         }
     }
 }
