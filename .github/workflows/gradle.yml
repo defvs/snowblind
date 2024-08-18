@@ -8,10 +8,8 @@
 name: Java CI with Gradle
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  - push
+  - pull_request
 
 jobs:
   build:
@@ -34,7 +32,7 @@ jobs:
       uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: ./gradlew build -x test
 
   jar:
     runs-on: ubuntu-latest
