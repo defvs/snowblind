@@ -118,6 +118,9 @@ class SliderControl : NodeParameterControl() {
                         event.consume()
                     }
                 }
+
+                mouseTransparentProperty().bind(this@SliderControl.isConnected)
+                opacityProperty().bind(this@SliderControl.isConnected.map { if (it) 0.5f else 1.0f })
             }.also { slider = it }
 
             children[0].toFront()

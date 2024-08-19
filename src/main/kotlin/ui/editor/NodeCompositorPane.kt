@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane
 import javafx.scene.shape.Line
 import nodes.INodeBase
 import nodes.NodeConnection
+import nodes.NodeParameter
 import ui.nodes.*
 
 class NodeCompositorPane(val clip: Clip) : Pane() {
@@ -44,11 +45,18 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
 
         // Setup binding from clip.connectionMap
         clip.connectionMap.addListener { change: MapChangeListener.Change<out ConnectorUUID, out NodeConnection> ->
-            if (change.wasAdded())
+            if (change.wasAdded()) {
                 connections.add(LineConnector(change.valueAdded, this).also { children += it })
+                getNode(change.valueAdded.dest.nodeUUID)?.parameters?.get(change.valueAdded.dest.connectorUUID)?.let {
+                    it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                }?.control?.isConnected?.set(true)
+            }
             if (change.wasRemoved()) {
                 connections.removeIf { it.connection == change.valueRemoved }
                 children.removeIf { it is LineConnector && it.connection == change.valueRemoved }
+                getNode(change.valueRemoved.dest.nodeUUID)?.parameters?.get(change.valueRemoved.dest.connectorUUID)?.let {
+                    it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                }?.control?.isConnected?.set(false)
             }
             hasUnsavedChanges.set(true)
         }
