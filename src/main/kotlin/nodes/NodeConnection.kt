@@ -73,4 +73,8 @@ class NodeConnectionMap private constructor(
         remove(connection.dest.connectorUUID)
     }
     operator fun minusAssign(connection: NodeConnection) = remove(connection)
+
+    fun remove(nodeUUID: NodeUUID) =
+        this.values.removeIf { it.dest.nodeUUID == nodeUUID || it.source.nodeUUID == nodeUUID }
+    operator fun minusAssign(nodeUUID: NodeUUID) { remove(nodeUUID) }
 }

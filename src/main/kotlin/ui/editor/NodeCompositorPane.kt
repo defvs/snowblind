@@ -206,7 +206,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
             val deleteItem = MenuItem("Delete")
             deleteItem.setOnAction {
                 this@NodeCompositorPane.clip.nodes.remove(this.uuid)
-                removeNode(this.uuid)
+                this@NodeCompositorPane.clip.connectionMap.remove(this.uuid)
             }
             contextMenu.items.add(deleteItem)
             this.children.single { it.id == IDs.NODE_HEADER_DRAGBOX }
@@ -218,7 +218,6 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
 
     fun removeNode(uuid: NodeUUID) {
         val nodeToRemove = getNode(uuid) ?: return
-        disconnectNodes(uuid)
         this.children.remove(nodeToRemove)
     }
 
