@@ -17,7 +17,7 @@ object NodeConnectionMapSerializer : KSerializer<NodeConnectionMap> {
         NodeConnectionMap(*decoder.decodeSerializableValue(delegateSerializer))
 
     override fun serialize(encoder: Encoder, value: NodeConnectionMap) {
-        encoder.encodeSerializableValue(delegateSerializer, value.connections.toTypedArray())
+        encoder.encodeSerializableValue(delegateSerializer, value.toTypedArray())
     }
 
 }

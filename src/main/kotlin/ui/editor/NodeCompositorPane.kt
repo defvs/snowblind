@@ -7,6 +7,7 @@ import helpers.findParent
 import helpers.front
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.MapChangeListener
+import javafx.collections.SetChangeListener
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
@@ -44,24 +45,26 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         }
 
         // Setup binding from clip.connectionMap
-        clip.connectionMap.addListener { change: MapChangeListener.Change<out ConnectorUUID, out NodeConnection> ->
-            if (change.wasAdded()) {
-                connections.add(LineConnector(change.valueAdded, this).also { children += it })
-                getNode(change.valueAdded.dest.nodeUUID)?.parameters?.get(change.valueAdded.dest.connectorUUID)?.let {
-                    it as? NodeParameter.ControllableParameter.ControllableInputParameter
-                }?.control?.isConnected?.set(true)
-            }
-            if (change.wasRemoved()) {
-                connections.removeIf { it.connection == change.valueRemoved }
-                children.removeIf { it is LineConnector && it.connection == change.valueRemoved }
-                getNode(change.valueRemoved.dest.nodeUUID)?.parameters?.get(change.valueRemoved.dest.connectorUUID)?.let {
-                    it as? NodeParameter.ControllableParameter.ControllableInputParameter
-                }?.control?.isConnected?.set(false)
+        clip.connectionMap.addListener { change: SetChangeListener.Change<out NodeConnection> ->
+            when {
+                change.wasAdded() -> {
+                    connections.add(LineConnector(change.elementAdded, this).also { children += it })
+                    getNode(change.elementAdded.dest.nodeUUID)?.parameters?.get(change.elementAdded.dest.connectorUUID)?.let {
+                        it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                    }?.control?.isConnected?.set(true)
+                }
+                change.wasRemoved() -> {
+                    connections.removeIf { it.connection == change.elementRemoved }
+                    children.removeIf { it is LineConnector && it.connection == change.elementRemoved }
+                    getNode(change.elementRemoved.dest.nodeUUID)?.parameters?.get(change.elementRemoved.dest.connectorUUID)?.let {
+                        it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                    }?.control?.isConnected?.set(false)
+                }
             }
             hasUnsavedChanges.set(true)
         }
         // Initialize
-        clip.connectionMap.forEach { (_, value) ->
+        clip.connectionMap.forEach { value ->
             connections.add(LineConnector(value, this).also { children += it })
         }
 
