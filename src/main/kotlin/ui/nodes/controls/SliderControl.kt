@@ -85,6 +85,14 @@ class SliderControl : NodeParameterControl() {
                 alignment = Pos.CENTER_LEFT
                 children += Label(parameter!!.name).also {
                     minWidthProperty().bind(it.widthProperty().multiply(1.5))
+
+                    it.styleProperty().bind(Bindings.createStringBinding({
+                        if (isConnected.get()) {
+                            "-fx-font-style: italic;"
+                        } else {
+                            "-fx-font-style: normal;"
+                        }
+                    }, isConnected))
                 }
                 children += Region().apply {
                     setHgrow(Priority.ALWAYS)
