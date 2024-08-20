@@ -11,8 +11,10 @@ import javafx.collections.SetChangeListener
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
+import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
+import javafx.scene.layout.Region
 import javafx.scene.shape.Line
 import nodes.INodeBase
 import nodes.NodeConnection
@@ -31,6 +33,13 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     val hasUnsavedChanges = SimpleBooleanProperty(false)
 
     init {
+        // Styling
+        style = """
+            -fx-background-color: #ffffff,
+            linear-gradient(from 0.5px 0.0px to 15.5px  0.0px, repeat, #00000010 5%, transparent 5%),
+            linear-gradient(from 0.0px 0.5px to  0.0px 15.5px, repeat, #00000010 5%, transparent 5%);   
+        """
+
         // Setup binding from clip.nodes
         clip.nodes.addListener { change: MapChangeListener.Change<out NodeUUID, out INodeBase> ->
             when {
@@ -49,16 +58,19 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
             when {
                 change.wasAdded() -> {
                     connections.add(LineConnector(change.elementAdded, this).also { children += it })
-                    getNode(change.elementAdded.dest.nodeUUID)?.parameters?.get(change.elementAdded.dest.connectorUUID)?.let {
-                        it as? NodeParameter.ControllableParameter.ControllableInputParameter
-                    }?.control?.isConnected?.set(true)
+                    getNode(change.elementAdded.dest.nodeUUID)?.parameters?.get(change.elementAdded.dest.connectorUUID)
+                        ?.let {
+                            it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                        }?.control?.isConnected?.set(true)
                 }
+
                 change.wasRemoved() -> {
                     connections.removeIf { it.connection == change.elementRemoved }
                     children.removeIf { it is LineConnector && it.connection == change.elementRemoved }
-                    getNode(change.elementRemoved.dest.nodeUUID)?.parameters?.get(change.elementRemoved.dest.connectorUUID)?.let {
-                        it as? NodeParameter.ControllableParameter.ControllableInputParameter
-                    }?.control?.isConnected?.set(false)
+                    getNode(change.elementRemoved.dest.nodeUUID)?.parameters?.get(change.elementRemoved.dest.connectorUUID)
+                        ?.let {
+                            it as? NodeParameter.ControllableParameter.ControllableInputParameter
+                        }?.control?.isConnected?.set(false)
                 }
             }
             hasUnsavedChanges.set(true)
@@ -83,9 +95,14 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderPressed(event: MouseEvent) {
+        if (event.button != MouseButton.PRIMARY) return
         val node = event.target as? Node ?: return
         if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
+            minWidth = width // fix the width
+            maxWidth = width
+            minHeight = height // fix the height
+            maxHeight = height
             this.children.front(parentNodeUI)
             NodeDragContext.apply {
                 initialX = parentNodeUI.layoutX
@@ -93,16 +110,19 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                 offsetX = event.sceneX
                 offsetY = event.sceneY
             }
+
+            event.consume()
         }
     }
 
     private fun onNodeHeaderDragged(event: MouseEvent) {
-        fun stayInBoundsX(x: Double) =
-            x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
+        fun stayInBoundsX(x: Double) = x.coerceAtLeast(0.0)
+//            x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
 
-        fun stayInBoundsY(y: Double) =
-            y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
+        fun stayInBoundsY(y: Double) = y.coerceAtLeast(0.0)
+//            y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
 
+        if (event.button != MouseButton.PRIMARY) return
         val node = event.target as? Node ?: return
         if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
@@ -110,6 +130,20 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
             val newY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
             parentNodeUI.layoutX = stayInBoundsX(newX)
             parentNodeUI.layoutY = stayInBoundsY(newY)
+
+            event.consume()
+        }
+    }
+
+    private fun onNodeHeaderReleased(event: MouseEvent) {
+        if (event.button != MouseButton.PRIMARY) return
+        val node = event.target as? Node ?: return
+        if (node.id == IDs.NODE_HEADER_DRAGBOX) {
+            minWidth = Region.USE_PREF_SIZE // unfix width
+            maxWidth = Region.USE_PREF_SIZE
+            minHeight = Region.USE_PREF_SIZE // unfix height
+            maxHeight = Region.USE_PREF_SIZE
+            event.consume()
         }
     }
     // endregion
@@ -211,6 +245,7 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         node.createUIElement().apply {
             onHeaderMousePressed = ::onNodeHeaderPressed
             onHeaderMouseDragged = ::onNodeHeaderDragged
+            onHeaderMouseReleased = ::onNodeHeaderReleased
 
             // Set up context menu on node header
             val contextMenu = ContextMenu()

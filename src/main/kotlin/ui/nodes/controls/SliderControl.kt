@@ -2,6 +2,7 @@ package ui.nodes.controls
 
 import helpers.*
 import javafx.beans.binding.Bindings
+import javafx.event.Event
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Label
@@ -79,6 +80,8 @@ class SliderControl : NodeParameterControl() {
     private lateinit var slider: Slider
     override lateinit var control: Node
 
+    private lateinit var hBox: HBox
+
     override fun initControl(): Node {
         control = StackPane {
             children += HBox {
@@ -105,7 +108,7 @@ class SliderControl : NodeParameterControl() {
                 isMouseTransparent = true
 
                 padding = Insets(0.0, 8.0)
-            }
+            }.also { hBox = it }
             children += Slider().apply {
                 skin = SliderControlSkin(this)
 
@@ -125,6 +128,14 @@ class SliderControl : NodeParameterControl() {
                             value = 0.0
                         event.consume()
                     }
+                    if (event.button == MouseButton.PRIMARY && isEditing) {
+                        event.consume()
+                        endEdit()
+                    }
+                    if (event.button == MouseButton.MIDDLE) {
+                        parent.parent.fireEvent(event.clone() as Event)
+                        event.consume()
+                    }
                 }
 
                 mouseTransparentProperty().bind(this@SliderControl.isConnected)
@@ -137,45 +148,46 @@ class SliderControl : NodeParameterControl() {
     }
 
     private var isEditing = false
+    private lateinit var editField: TextField
 
     private fun startValueEdit() {
         isEditing = true
-        val parent = (valueLabel.parent as HBox)
-        val field = TextField(valueLabel.textProperty().get())
+
+        if (!::editField.isInitialized) editField = TextField(valueLabel.textProperty().get())
 
         // Create a Text node to measure the width of the text
         val textNode = Text()
-        textNode.textProperty().bind(field.textProperty())
+        textNode.textProperty().bind(editField.textProperty())
 
-        field.style = """
+        editField.style = """
             -fx-background-color: transparent;
             -fx-border-color: transparent;
             -fx-padding: 0;
             -fx-text-fill: -fx-text-inner-color;
         """
-        field.prefWidthProperty().bind(Bindings.createDoubleBinding({
+        editField.prefWidthProperty().bind(Bindings.createDoubleBinding({
             textNode.layoutBounds.width + 10 // Add some padding for better appearance
         }, textNode.layoutBoundsProperty()))
 
-        parent.children[2] = field
-        field.alignment = Pos.CENTER_RIGHT
+        hBox.children[2] = editField
+        editField.alignment = Pos.CENTER_RIGHT
 
-        fun endEdit() {
-            parent.children[2] = valueLabel
-            parameter!!.valueConverter.fromString(field.text)?.let { value.set(it) }
-            isEditing = false
-        }
-
-        field.focusedProperty().addListener { _, _, newValue ->
+        editField.focusedProperty().addListener { _, _, newValue ->
             if (newValue == false) endEdit()
         }
-        field.setOnKeyPressed { event ->
+        editField.setOnKeyPressed { event ->
             if (event.code == KeyCode.ENTER || event.code == KeyCode.ESCAPE) {
                 endEdit()
             }
         }
 
-        field.requestFocus()
-        field.selectAll()  // Select all text when editing starts
+        editField.requestFocus()
+        editField.selectAll()  // Select all text when editing starts
+    }
+
+    private fun endEdit() {
+        hBox.children[2] = valueLabel
+        parameter!!.valueConverter.fromString(editField.text)?.let { value.set(it) }
+        isEditing = false
     }
 }
