@@ -64,7 +64,6 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
                 if (event.clickCount == 2) {
                     (selectionModel.selectedItem as? ListItem.Node)?.create(compositorPane)?.also { node ->
                         compositorPane.clip += node
-                        compositorPane.addNode(node)
                     }
                 }
             }
