@@ -36,8 +36,8 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         // Styling
         style = """
             -fx-background-color: #ffffff,
-            linear-gradient(from 0.5px 0.0px to 15.5px  0.0px, repeat, #00000010 5%, transparent 5%),
-            linear-gradient(from 0.0px 0.5px to  0.0px 15.5px, repeat, #00000010 5%, transparent 5%);   
+            linear-gradient(from 0.5px 0.0px to 15.5px  0.0px, repeat, #00000008 5%, transparent 5%),
+            linear-gradient(from 0.0px 0.5px to  0.0px 15.5px, repeat, #00000008 5%, transparent 5%);   
         """
 
         // Setup binding from clip.nodes
@@ -99,10 +99,8 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         val node = event.target as? Node ?: return
         if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
-            minWidth = width // fix the width
-            maxWidth = width
-            minHeight = height // fix the height
-            maxHeight = height
+            prefWidth = width
+            prefHeight = height
             this.children.front(parentNodeUI)
             NodeDragContext.apply {
                 initialX = parentNodeUI.layoutX
@@ -116,20 +114,15 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
     }
 
     private fun onNodeHeaderDragged(event: MouseEvent) {
-        fun stayInBoundsX(x: Double) = x.coerceAtLeast(0.0)
-//            x.coerceIn(0.0, this@NodeCompositorPane.width - (event.target as Node).boundsInParent.width)
-
-        fun stayInBoundsY(y: Double) = y.coerceAtLeast(0.0)
-//            y.coerceIn(0.0, this@NodeCompositorPane.height - (event.target as Node).boundsInParent.height)
 
         if (event.button != MouseButton.PRIMARY) return
         val node = event.target as? Node ?: return
         if (node.id == IDs.NODE_HEADER_DRAGBOX) {
             val parentNodeUI = node.findParent<NodeUIElement>() ?: return
-            val newX = NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX
-            val newY = NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY
-            parentNodeUI.layoutX = stayInBoundsX(newX)
-            parentNodeUI.layoutY = stayInBoundsY(newY)
+            parentNodeUI.layoutX = (NodeDragContext.initialX + event.sceneX - NodeDragContext.offsetX)
+                .coerceAtLeast(0.0)
+            parentNodeUI.layoutY = (NodeDragContext.initialY + event.sceneY - NodeDragContext.offsetY)
+                .coerceAtLeast(0.0)
 
             event.consume()
         }
@@ -139,10 +132,8 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         if (event.button != MouseButton.PRIMARY) return
         val node = event.target as? Node ?: return
         if (node.id == IDs.NODE_HEADER_DRAGBOX) {
-            minWidth = Region.USE_PREF_SIZE // unfix width
-            maxWidth = Region.USE_PREF_SIZE
-            minHeight = Region.USE_PREF_SIZE // unfix height
-            maxHeight = Region.USE_PREF_SIZE
+            prefWidth = Region.USE_COMPUTED_SIZE
+            prefHeight = Region.USE_COMPUTED_SIZE
             event.consume()
         }
     }

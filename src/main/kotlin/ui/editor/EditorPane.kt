@@ -24,6 +24,8 @@ class EditorPane(clip: Clip) : SplitPane() {
                         event.consume() // Prevent right & left-click from doing anything
                     }
                 }
+                nodeCompositor.minWidthProperty().bind(this.viewportBoundsProperty().map { it.width })
+                nodeCompositor.minHeightProperty().bind(this.viewportBoundsProperty().map { it.height })
 
             }
         )
