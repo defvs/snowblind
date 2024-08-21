@@ -2,7 +2,6 @@ package nodes
 
 import helpers.ConnectorUUID
 import helpers.replaceAllIndexed
-import nodes.helpers.ValueConverter
 import ui.nodes.controls.NodeParameterControl
 
 class NodeParameterMap(

@@ -1,11 +1,7 @@
 package nodes.helpers
 
+import nodes.ValueConverter
 import kotlin.math.roundToInt
-
-interface ValueConverter {
-    fun toString(value: Float): String
-    fun fromString(string: String): Float?
-}
 
 object SimpleValueConverters {
     object AsInteger : ValueConverter {

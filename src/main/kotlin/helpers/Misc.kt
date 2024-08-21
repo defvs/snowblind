@@ -3,7 +3,7 @@ package helpers
 import javafx.beans.binding.Bindings
 import javafx.beans.property.FloatProperty
 import javafx.beans.property.StringProperty
-import nodes.helpers.ValueConverter
+import nodes.ValueConverter
 
 fun <T, U, V> Iterable<T>.zipTriple(other1: Iterable<U>, other2: Iterable<V>): ArrayList<Triple<T, U, V>> {
     val first = iterator()
