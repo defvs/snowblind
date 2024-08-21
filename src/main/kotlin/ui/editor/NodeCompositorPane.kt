@@ -197,6 +197,19 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
                 if (NodeConnectorDragContext.sourceConnector!!.connectorUUID == node.connectorUUID) return
                 if (NodeConnectorDragContext.sourceConnector!!.connectorType.opposite != node.connectorType) return
 
+                // Check if ParameterInput and dest is already in the map
+                val isInvalidParameterInput = let {
+                    val sourceInvalid =
+                        (NodeConnectorDragContext.sourceConnector!!.connectorType == ConnectorType.ParameterInput)
+                            .and(NodeConnectorDragContext.sourceConnector!!.connectorUUID in clip.connectionMap)
+                    val destInvalid =
+                        (node.connectorType == ConnectorType.ParameterInput)
+                            .and(node.connectorUUID in clip.connectionMap)
+
+                    sourceInvalid || destInvalid
+                }
+                if (isInvalidParameterInput) return
+
                 clip.connectionMap +=
                     if (!NodeConnectorDragContext.sourceConnector!!.connectorType.isInput)
                         NodeConnection(
