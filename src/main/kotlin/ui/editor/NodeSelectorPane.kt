@@ -56,7 +56,11 @@ class NodeSelectorPane(private val compositorPane: NodeCompositorPane) : StackPa
         // Create a root item that won't be shown
         val rootItem = TreeItem<TreeNodeItem>()
 
-        fun createCategoryTreeItem(categoryName: String, nodes: List<KClass<out INodeBase>>, maxWidth: ReadOnlyDoubleProperty): TreeItem<TreeNodeItem> {
+        fun createCategoryTreeItem(
+            categoryName: String,
+            nodes: List<KClass<out INodeBase>>,
+            maxWidth: ReadOnlyDoubleProperty,
+        ): TreeItem<TreeNodeItem> {
             val categoryItem = TreeItem<TreeNodeItem>(TreeNodeItem.NodeTitle(categoryName, maxWidth))
             nodes.forEach {
                 val nodeItem = TreeItem<TreeNodeItem>(TreeNodeItem.Node(it, maxWidth))
