@@ -11,8 +11,10 @@ import javafx.collections.SetChangeListener
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.MenuItem
+import javafx.scene.input.Dragboard
 import javafx.scene.input.MouseButton
 import javafx.scene.input.MouseEvent
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Region
 import javafx.scene.shape.Line
@@ -20,6 +22,7 @@ import nodes.INodeBase
 import nodes.NodeConnection
 import nodes.NodeParameter
 import ui.nodes.*
+import kotlin.reflect.full.createInstance
 
 class NodeCompositorPane(val clip: Clip) : Pane() {
     private val connections = hashSetOf<LineConnector>()
@@ -84,6 +87,36 @@ class NodeCompositorPane(val clip: Clip) : Pane() {
         setOnMousePressed { onMousePressed(it) }
         setOnMouseDragged { onMouseDragged(it) }
         setOnMouseReleased { onMouseReleased(it) }
+
+        setOnDragOver { event ->
+            if (event.gestureSource != this && event.dragboard.hasString()) {
+                event.acceptTransferModes(TransferMode.COPY)
+            }
+            event.consume()
+        }
+
+        setOnDragDropped { event ->
+            val dragboard: Dragboard = event.dragboard
+            var success = false
+            if (dragboard.hasString()) {
+                // Retrieve the node's class by its qualified name
+                val node = run {
+                    val nodeClass = Class.forName(dragboard.string).kotlin
+                    nodeClass.createInstance() as? INodeBase
+                } ?: return@setOnDragDropped
+
+                // Set the node's position to the drop location
+                node.position.first.set(event.x.toFloat().coerceAtLeast(0f))
+                node.position.second.set(event.y.toFloat().coerceAtLeast(0f))
+
+                // Add the node to the compositor
+                addNode(node)
+
+                success = true
+            }
+            event.isDropCompleted = success
+            event.consume()
+        }
     }
 
     // region Node Header movement
