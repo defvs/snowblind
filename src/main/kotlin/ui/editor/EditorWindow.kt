@@ -18,7 +18,7 @@ import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.jvm.optionals.getOrNull
 
-class EditorWindow private constructor(private val clip: Clip, private var initiallyEmpty: Boolean = false) {
+class EditorWindow private constructor(private val clip: Clip, private var savePath: String? = null) {
     private val editorPane = EditorPane(clip)
     private lateinit var stage: Stage
 
@@ -61,7 +61,7 @@ class EditorWindow private constructor(private val clip: Clip, private var initi
 
                 show()
 
-                if (initiallyEmpty)
+                if (savePath == null)
                     editorPane.nodeCompositor.hasUnsavedChanges.set(true)
             }
         }
@@ -99,11 +99,10 @@ class EditorWindow private constructor(private val clip: Clip, private var initi
     }
 
     private fun saveClip(): Boolean {
-        if (initiallyEmpty) {
-            initiallyEmpty = false
+        if (savePath == null) {
             return saveClipAs()
         }
-        runCatching { File("${clip.name.value}.json").writeText(json.encodeToString<Clip>(clip)) }
+        runCatching { File(savePath!!).writeText(json.encodeToString<Clip>(clip)) }
             .onFailure {
                 Alert(Alert.AlertType.ERROR, "Failed to save to file!", ButtonType.CLOSE)
                 return false
@@ -118,6 +117,7 @@ class EditorWindow private constructor(private val clip: Clip, private var initi
     private fun saveClipAs() = FileChooser().apply {
         extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
     }.showSaveDialog(stage)?.let { file ->
+        savePath = file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }
         clip.name.set(file.nameWithoutExtension)
         clip.uuid.set(ClipUUID())
         saveClip()
@@ -132,7 +132,7 @@ class EditorWindow private constructor(private val clip: Clip, private var initi
                 val selectedFile: File? = fileChooser.showOpenDialog(null)
                 selectedFile?.let { file ->
                     val clip = json.decodeFromString<Clip>(file.readText())
-                    EditorWindow(clip).createAndShow()
+                    EditorWindow(clip, file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }).createAndShow()
                 }
             }
         }
@@ -142,7 +142,7 @@ class EditorWindow private constructor(private val clip: Clip, private var initi
         }
 
         fun createEmpty() {
-            EditorWindow(GeneratorClip(), initiallyEmpty = true).createAndShow()
+            EditorWindow(GeneratorClip()).createAndShow()
         }
     }
 }
