@@ -43,7 +43,7 @@ infix fun StringProperty.bindTo(value: FloatProperty) = LabelTextPropertyBinder(
 
 fun <K, V> zipMapOfList(
     map1: Map<K, List<V>>,
-    map2: Map<K, List<V>>
+    map2: Map<K, List<V>>,
 ): Map<K, List<V>> {
     return (map1.asSequence() + map2.asSequence())
         .groupBy({ it.key }, { it.value })

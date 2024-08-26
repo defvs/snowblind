@@ -3,8 +3,8 @@ package helpers
 import nodes.INodeBase
 import kotlin.reflect.KClass
 
-class NodesGroupsList internal constructor(private val groups: Map<NodesGroups, List<KClass<out INodeBase>>>)
-    : Map<NodesGroupsList.NodesGroups, List<KClass<out INodeBase>>> by groups{
+class NodesGroupsList internal constructor(private val groups: Map<NodesGroups, List<KClass<out INodeBase>>>) :
+    Map<NodesGroupsList.NodesGroups, List<KClass<out INodeBase>>> by groups {
     enum class NodesGroups(val categoryTitle: String) {
         Generators("Laser Generators"),
         Transforms("Laser Transforms"),

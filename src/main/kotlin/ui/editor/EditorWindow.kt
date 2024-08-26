@@ -134,7 +134,9 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
                 val selectedFile: File? = fileChooser.showOpenDialog(null)
                 selectedFile?.let { file ->
                     val clip = json.decodeFromString<Clip>(file.readText())
-                    EditorWindow(clip, file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }).createAndShow()
+                    EditorWindow(
+                        clip,
+                        file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }).createAndShow()
                 }
             }
         }

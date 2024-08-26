@@ -85,9 +85,10 @@ class NodeSelectorPane(private val editorPane: EditorPane) : StackPane() {
             isShowRoot = false  // This removes the display of the root item
             setOnMouseClicked { event ->
                 if (event.clickCount == 2) {
-                    (selectionModel.selectedItem?.value as? TreeNodeItem.Node)?.create(editorPane.nodeCompositor)?.also { node ->
-                        editorPane.nodeCompositor.clip += node
-                    }
+                    (selectionModel.selectedItem?.value as? TreeNodeItem.Node)?.create(editorPane.nodeCompositor)
+                        ?.also { node ->
+                            editorPane.nodeCompositor.clip += node
+                        }
                 }
             }
         }

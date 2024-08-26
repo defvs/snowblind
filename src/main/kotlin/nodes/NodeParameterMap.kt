@@ -18,6 +18,7 @@ class NodeParameterMap(
     operator fun set(uuid: ConnectorUUID, value: Float) {
         (parametersByUUID[uuid] as? NodeParameter.ControllableParameter)?.value = value
     }
+
     operator fun set(index: Int, value: Float) {
         (parameters[index] as? NodeParameter.ControllableParameter)?.value = value
     }
