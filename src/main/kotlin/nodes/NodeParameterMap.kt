@@ -30,6 +30,10 @@ class NodeParameterMap(
 
 }
 
+@DslMarker
+annotation class NodeParameterDsl
+
+@NodeParameterDsl
 class NodeParameterMapBuilder {
     private val parameters = mutableListOf<NodeParameter>()
 
