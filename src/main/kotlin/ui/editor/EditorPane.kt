@@ -9,7 +9,7 @@ import javafx.scene.input.MouseEvent
 
 class EditorPane(clip: Clip) : SplitPane() {
     val nodeCompositor = NodeCompositorPane(clip)
-    val nodeSelector = NodeSelectorPane(nodeCompositor)
+    val nodeSelector = NodeSelectorPane(this)
 
     init {
         items.addAll(

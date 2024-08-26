@@ -16,8 +16,11 @@ class ExampleApp : Application() {
             Button("Open from file").apply {
                 setOnMouseClicked { EditorWindow.openFromFile() }
             },
-            Button("New (empty)").apply {
-                setOnMouseClicked { EditorWindow.createEmpty() }
+            Button("New (empty Generator)").apply {
+                setOnMouseClicked { EditorWindow.createEmptyGeneratorClip() }
+            },
+            Button("New (empty Effect)").apply {
+                setOnMouseClicked { EditorWindow.createEmptyEffectClip() }
             },
             Button("New (test not empty)").apply {
                 setOnMouseClicked {

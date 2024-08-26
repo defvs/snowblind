@@ -1,7 +1,9 @@
 package ui.editor
 
 import clips.Clip
+import clips.EffectClip
 import clips.GeneratorClip
+import clips.createEmpty
 import helpers.ClipUUID
 import helpers.serialization.json
 import javafx.application.Platform
@@ -141,8 +143,12 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
             EditorWindow(clip).createAndShow()
         }
 
-        fun createEmpty() {
-            EditorWindow(GeneratorClip()).createAndShow()
+        fun createEmptyGeneratorClip() {
+            EditorWindow(GeneratorClip.createEmpty()).createAndShow()
+        }
+
+        fun createEmptyEffectClip() {
+            EditorWindow(EffectClip.createEmpty()).createAndShow()
         }
     }
 }
