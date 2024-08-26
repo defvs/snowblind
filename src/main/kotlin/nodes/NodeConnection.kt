@@ -4,7 +4,7 @@ import helpers.ConnectorUUID
 import helpers.NodeUUID
 import helpers.serialization.NodeConnectionMapSerializer
 import javafx.collections.FXCollections
-import javafx.collections.ObservableMap
+import javafx.collections.ObservableSet
 import kotlinx.serialization.Serializable
 
 /**
@@ -44,33 +44,31 @@ data class NodeConnection(
 /**
  * Class representing a map of node connections.
  *
- * @property connections A collection of node connections.
+ * @param connections A collection of node connections.
  */
 @Serializable(with = NodeConnectionMapSerializer::class)
 class NodeConnectionMap private constructor(
-    private val map: ObservableMap<ConnectorUUID, NodeConnection> = FXCollections.observableHashMap()
-) : ObservableMap<ConnectorUUID, NodeConnection> by map {
+    private val set: ObservableSet<NodeConnection> = FXCollections.observableSet()
+) : ObservableSet<NodeConnection> by set {
     constructor(vararg connections: NodeConnection): this() {
         connections.forEach(::add)
     }
 
-    val connections: Collection<NodeConnection>
-        get() = this.values
-
-    fun add(connection: NodeConnection) {
-        this[connection.source.connectorUUID] = connection
-        this[connection.dest.connectorUUID] = connection
+    operator fun get(connector: ConnectorUUID) = this.last {
+        it.dest.connectorUUID == connector || it.source.connectorUUID == connector
     }
-    operator fun plusAssign(connection: NodeConnection) = add(connection)
 
-    override fun remove(key: ConnectorUUID) = this.values.firstOrNull {
-        it.dest.connectorUUID == key || it.source.connectorUUID == key
-    }?.also { this.values.remove(it) }
+    fun remove(connector: ConnectorUUID) = this.filter {
+        it.dest.connectorUUID == connector || it.source.connectorUUID == connector
+    }.forEach { this.remove(it) }
     operator fun minusAssign(connector: ConnectorUUID) { remove(connector) }
 
-    fun remove(connection: NodeConnection) {
-        remove(connection.source.connectorUUID)
-        remove(connection.dest.connectorUUID)
-    }
-    operator fun minusAssign(connection: NodeConnection) = remove(connection)
+    operator fun minusAssign(connection: NodeConnection) { remove(connection) }
+
+    fun remove(node: NodeUUID) =
+        this.removeIf { it.dest.nodeUUID == node || it.source.nodeUUID == node }
+    operator fun minusAssign(nodeUUID: NodeUUID) { remove(nodeUUID) }
+
+    operator fun contains(connector: ConnectorUUID) =
+        this.any { it.dest.connectorUUID == connector || it.source.connectorUUID == connector }
 }

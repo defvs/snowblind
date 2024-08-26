@@ -20,6 +20,7 @@ import nodes.implementations.special.OutputNode
 class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
     var onHeaderMousePressed: (e: MouseEvent) -> Unit = {}
     var onHeaderMouseDragged: (e: MouseEvent) -> Unit = {}
+    var onHeaderMouseReleased: (e: MouseEvent) -> Unit = {}
 
     private val ioCircles: List<NodeUIElementCircle>
 
@@ -41,6 +42,7 @@ class NodeUIElement(private val node: INodeBase) : VBox(), INodeBase by node {
             padding = Insets(4.0, 8.0)
             setOnMousePressed { onHeaderMousePressed(it) }
             setOnMouseDragged { onHeaderMouseDragged(it) }
+            setOnMouseReleased { onHeaderMouseReleased(it) }
 
             if (node is TransformNode || node is OutputNode) {
                 val laserInputUUID = (node as? TransformNode)?.laserInputUUID ?: (node as OutputNode).laserInputUUID

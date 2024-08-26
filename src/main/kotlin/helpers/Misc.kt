@@ -3,7 +3,7 @@ package helpers
 import javafx.beans.binding.Bindings
 import javafx.beans.property.FloatProperty
 import javafx.beans.property.StringProperty
-import nodes.helpers.ValueConverter
+import nodes.ValueConverter
 
 fun <T, U, V> Iterable<T>.zipTriple(other1: Iterable<U>, other2: Iterable<V>): ArrayList<Triple<T, U, V>> {
     val first = iterator()
@@ -40,3 +40,12 @@ class LabelTextPropertyBinder(private val stringProperty: StringProperty, privat
 }
 
 infix fun StringProperty.bindTo(value: FloatProperty) = LabelTextPropertyBinder(this, value)
+
+fun <K, V> zipMapOfList(
+    map1: Map<K, List<V>>,
+    map2: Map<K, List<V>>,
+): Map<K, List<V>> {
+    return (map1.asSequence() + map2.asSequence())
+        .groupBy({ it.key }, { it.value })
+        .mapValues { (_, values) -> values.flatten() }
+}

@@ -2,7 +2,6 @@ package nodes
 
 import helpers.ConnectorUUID
 import helpers.replaceAllIndexed
-import nodes.helpers.ValueConverter
 import ui.nodes.controls.NodeParameterControl
 
 class NodeParameterMap(
@@ -19,6 +18,7 @@ class NodeParameterMap(
     operator fun set(uuid: ConnectorUUID, value: Float) {
         (parametersByUUID[uuid] as? NodeParameter.ControllableParameter)?.value = value
     }
+
     operator fun set(index: Int, value: Float) {
         (parameters[index] as? NodeParameter.ControllableParameter)?.value = value
     }
@@ -30,6 +30,10 @@ class NodeParameterMap(
 
 }
 
+@DslMarker
+annotation class NodeParameterDsl
+
+@NodeParameterDsl
 class NodeParameterMapBuilder {
     private val parameters = mutableListOf<NodeParameter>()
 

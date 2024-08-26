@@ -76,7 +76,7 @@ class SerializationTest : DescribeSpec({
         }
 
         it("connections count should be the same") {
-            deserializedClip.connectionMap.connections.size shouldBeEqual clip.connectionMap.connections.size
+            deserializedClip.connectionMap.size shouldBeEqual clip.connectionMap.size
         }
     }
 

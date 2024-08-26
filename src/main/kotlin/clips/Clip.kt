@@ -9,6 +9,7 @@ package clips
 import helpers.ClipUUID
 import helpers.ConnectorUUID
 import helpers.NodeUUID
+import helpers.nodeClasses
 import helpers.serialization.javafx.FloatPropertySerializer
 import helpers.serialization.javafx.ObjectPropertySerializer
 import helpers.serialization.javafx.ObservableMapSerializer
@@ -23,9 +24,12 @@ import kotlinx.serialization.Transient
 import kotlinx.serialization.UseSerializers
 import laser.LaserObject
 import nodes.*
+import nodes.implementations.generators.PointGeneratorNode
 import nodes.implementations.special.InputNode
 import nodes.implementations.special.MacroNode
 import nodes.implementations.special.OutputNode
+import nodes.implementations.transforms.HSVShiftNode
+import nodes.implementations.transforms.PositionOffsetTransformNode
 
 /**
  * Base sealed class representing a clip.
@@ -172,6 +176,21 @@ sealed class Clip {
         paramsCache.clear()
         return internalProcess(macroValues)
     }
+
+    @Transient
+    open val AVAILABLE_NODES = nodeClasses {
+        specials(
+            MacroNode::class,
+            OutputNode::class,
+        )
+        transforms(
+            HSVShiftNode::class,
+            PositionOffsetTransformNode::class,
+        )
+        parameterTransforms(
+
+        )
+    }
 }
 
 
@@ -183,6 +202,20 @@ class GeneratorClip(
     override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
 ) : Clip() {
     constructor(name: String) : this(SimpleStringProperty(name))
+
+    @Transient
+    override val AVAILABLE_NODES = super.AVAILABLE_NODES + nodeClasses {
+        generators(
+            PointGeneratorNode::class,
+        )
+    }
+}
+
+fun GeneratorClip.Companion.createEmpty() = GeneratorClip().apply {
+    this += OutputNode().apply {
+        position.first.set(300f)
+        position.second.set(200f)
+    }
 }
 
 /**
@@ -193,7 +226,7 @@ class EffectClip(
     override var name: StringProperty = SimpleStringProperty("Unnamed Generator Clip"),
 ) : Clip() {
     constructor(name: String) : this(SimpleStringProperty(name))
-    
+
     /**
      * Processes the effect clip with the provided input laser objects.
      *
@@ -208,5 +241,23 @@ class EffectClip(
         nodes.values.filterIsInstance<InputNode>()
             .forEach { laserOutputCache[it.uuid] = input }
         return super.internalProcess(macroValues)
+    }
+
+    @Transient
+    override val AVAILABLE_NODES = super.AVAILABLE_NODES + nodeClasses {
+        specials(
+            InputNode::class,
+        )
+    }
+}
+
+fun EffectClip.Companion.createEmpty() = EffectClip().apply {
+    this += InputNode().apply {
+        position.first.set(100f)
+        position.second.set(200f)
+    }
+    this += OutputNode().apply {
+        position.first.set(300f)
+        position.second.set(200f)
     }
 }
