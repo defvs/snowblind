@@ -20,7 +20,12 @@ import javafx.scene.layout.TilePane
 import javafx.scene.layout.VBox
 
 class RackPane(private val rack: ClipRack) : VBox() {
-    val hasUnsavedChanges = SimpleBooleanProperty(false)
+    val hasUnsavedChanges = SimpleBooleanProperty(false).apply {
+        rack.name.addListener { _, _, _ -> this.set(true) }
+        rack.uuid.addListener { _, _, _ -> this.set(true) }
+        rack.generatorClips.addListener { _: ListChangeListener.Change<out Clip> -> this.set(true) }
+        rack.effectClips.addListener { _: ListChangeListener.Change<out Clip> -> this.set(true) }
+    }
 
     private val generatorClipsPane = TilePane(Orientation.HORIZONTAL, 8.0, 8.0).apply {
         Bindings.bindContent(this.children, ClipToNodeObservableList(rack.generatorClips))
