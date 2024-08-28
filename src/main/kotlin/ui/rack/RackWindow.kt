@@ -151,7 +151,7 @@ class RackWindow private constructor(private val rack: ClipRack, private var sav
                     RackWindow(
                         rack,
                         file.absolutePath.let { if (it.endsWith(".sbr")) it else "$it.sbr" }
-                    )
+                    ).createAndShow()
                 }
         }
 
