@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import javafx.collections.transformation.TransformationList
+import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -34,6 +35,8 @@ class RackPane(private val rack: ClipRack) : VBox() {
         children += generatorClipsPane
         children += Separator(Orientation.HORIZONTAL)
         children += effectClipsPane
+        spacing = 8.0
+        padding = Insets(8.0)
     }
 }
 
@@ -51,6 +54,8 @@ private class ClipToNodeObservableList(source: ObservableList<out Clip?>) : Tran
                 -fx-border-radius: 15;
                 -fx-background-radius: 15;
             """
+            prefWidth = 64.0
+            prefHeight = 64.0
         }
     }
 

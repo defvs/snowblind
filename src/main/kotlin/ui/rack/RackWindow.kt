@@ -52,10 +52,11 @@ class RackWindow private constructor(private val rack: ClipRack, private var sav
 
                 val root = BorderPane().apply {
                     top = menuBar
-                    center = ScrollPane(editorPane)
+                    center = editorPane
                 }
 
-                scene = Scene(root, 800.0, 600.0)
+                scene = Scene(root)
+                isResizable = false
 
                 titleProperty().bind(Bindings.createStringBinding({
                     if (editorPane.hasUnsavedChanges.get()) "• ${rack.name.value}" else rack.name.value
@@ -122,7 +123,7 @@ class RackWindow private constructor(private val rack: ClipRack, private var sav
      * @return true if a file was picked, false if not.
      */
     private fun saveClipAs() = FileChooser().apply {
-        extensionFilters.add(FileChooser.ExtensionFilter("Rack Files", "*.sbr"))
+        extensionFilters.add(FileChooser.ExtensionFilter("Rack Files (.sbr)", "*.sbr"))
     }.showSaveDialog(stage)?.let { file ->
         savePath = file.absolutePath.let { if (it.endsWith(".sbr")) it else "$it.sbr" }
         rack.name.set(file.nameWithoutExtension)
@@ -135,7 +136,7 @@ class RackWindow private constructor(private val rack: ClipRack, private var sav
         fun openFromFile() {
             Platform.runLater {
                 val fileChooser = FileChooser()
-                fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("Rack Files", "*.sbr"))
+                fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("Rack Files (.sbr)", "*.sbr"))
                 fileChooser.showOpenDialog(null)?.let { loadFromFile(it) }
             }
         }
