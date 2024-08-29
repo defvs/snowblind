@@ -10,7 +10,7 @@ import kotlinx.serialization.encoding.Encoder
 
 open class ClipRackSerializer(
     private val ignoreMissing: Boolean = false,
-    private val extraPaths: List<String> = emptyList(),
+    private val extraPaths: Set<String> = emptySet(),
 ) : KSerializer<ClipRack> {
     @Serializable
     data class NameAndUUID(
@@ -24,9 +24,9 @@ open class ClipRackSerializer(
         val uuid: ClipRackUUID,
         val generatorClips: Array<NameAndUUID?>,
         val effectClips: Array<NameAndUUID?>,
-        val lookupPaths: List<String>,
+        val lookupPaths: Set<String>,
     ) {
-        fun toClipRack(ignoreMissing: Boolean = false, extraPaths: List<String>) = ClipRack.initWithLookup(
+        fun toClipRack(ignoreMissing: Boolean = false, extraPaths: Set<String>) = ClipRack.initWithLookup(
             name,
             uuid,
             generatorClips,

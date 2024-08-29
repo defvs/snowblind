@@ -187,14 +187,14 @@ class RackWindow private constructor(private val rack: ClipRack, private var sav
 class MissingClipsDialog(exception: ClipsNotFoundException) :
     Dialog<MissingClipsDialog.MissingClipsDialogResult>() {
     sealed interface MissingClipsDialogResult {
-        data class Reload(val newPaths: List<String>) : MissingClipsDialogResult
+        data class Reload(val newPaths: Set<String>) : MissingClipsDialogResult
         data object Ignore : MissingClipsDialogResult
         data object Cancel : MissingClipsDialogResult
     }
 
     init {
         val missingClips = exception.clips
-        val lookupPaths = mutableListOf<String>()
+        val lookupPaths = hashSetOf<String>()
 
         // Data model for table
         data class ClipEntry(val name: String, val pathProperty: StringProperty)

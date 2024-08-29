@@ -20,7 +20,13 @@ import kotlinx.serialization.encodeToString
 import java.io.File
 import kotlin.jvm.optionals.getOrNull
 
-class EditorWindow private constructor(private val clip: Clip, private var savePath: String? = null) {
+typealias EditorCloseCallback = (Clip, File) -> Unit
+
+class EditorWindow private constructor(
+    private val clip: Clip,
+    private val onCloseCallback: EditorCloseCallback? = null,
+    private var savePath: File? = null,
+) {
     private val editorPane = EditorPane(clip)
     private lateinit var stage: Stage
 
@@ -40,7 +46,7 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
                         },
                         MenuItem("Close").apply {
                             accelerator = KeyCodeCombination(KeyCode.W, KeyCombination.CONTROL_DOWN)
-                            setOnAction { close() }
+                            setOnAction { this@EditorWindow.close() }
                         }
                     )
                 }
@@ -65,6 +71,11 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
 
                 if (savePath == null)
                     editorPane.nodeCompositor.hasUnsavedChanges.set(true)
+
+                setOnCloseRequest {
+                    this@EditorWindow.close()
+                    it.consume()
+                }
             }
         }
     }
@@ -84,11 +95,11 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
             when (result.getOrNull()?.text) {
                 "Save" -> {
                     if (saveClip()) // make sure saving goes as planned
-                        stage.close()
+                        closeStage()
                 }
 
                 "Don't Save" -> {
-                    stage.close()
+                    closeStage()
                 }
 
                 else -> {
@@ -96,15 +107,20 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
                 }
             }
         } else {
-            stage.close()
+            closeStage()
         }
+    }
+
+    private fun closeStage() {
+        stage.close()
+        savePath?.let { onCloseCallback?.invoke(clip, it) }
     }
 
     private fun saveClip(): Boolean {
         if (savePath == null) {
             return saveClipAs()
         }
-        runCatching { File(savePath!!).writeText(json.encodeToString<Clip>(clip)) }
+        runCatching { savePath!!.writeText(json.encodeToString<Clip>(clip)) }
             .onFailure {
                 Alert(Alert.AlertType.ERROR, "Failed to save to file!", ButtonType.CLOSE)
                 return false
@@ -117,9 +133,9 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
      * @return true if a file was picked, false if not.
      */
     private fun saveClipAs() = FileChooser().apply {
-        extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
+        extensionFilters.add(FileChooser.ExtensionFilter("Clip Files (.sbc)", "*.sbc"))
     }.showSaveDialog(stage)?.let { file ->
-        savePath = file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }
+        savePath = file.absolutePath.let { if (it.endsWith(".sbc")) it else "$it.sbc" }.let { File(it) }
         clip.name.set(file.nameWithoutExtension)
         clip.uuid.set(ClipUUID())
         saveClip()
@@ -127,17 +143,23 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
     } ?: false
 
     companion object {
-        fun openFromFile() {
+        fun openFromFile(callback: EditorCloseCallback? = null) {
             Platform.runLater {
-                val fileChooser = FileChooser()
-                fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("JSON Clip Files", "*.json"))
-                val selectedFile: File? = fileChooser.showOpenDialog(null)
-                selectedFile?.let { file ->
-                    val clip = json.decodeFromString<Clip>(file.readText())
+                pickFile()?.let { (clip, path) ->
                     EditorWindow(
                         clip,
-                        file.absolutePath.let { if (it.endsWith(".json")) it else "$it.json" }).createAndShow()
+                        callback,
+                        path.let { if (it.endsWith(".sbc")) it else "$it.sbc" }.let { File(it) }
+                    ).createAndShow()
                 }
+            }
+        }
+
+        fun pickFile(): Pair<Clip, String>? {
+            val fileChooser = FileChooser()
+            fileChooser.extensionFilters.add(FileChooser.ExtensionFilter("Clip Files (.sbc)", "*.sbc"))
+            return fileChooser.showOpenDialog(null)?.let { file ->
+                json.decodeFromString<Clip>(file.readText()) to file.absolutePath
             }
         }
 
@@ -145,12 +167,12 @@ class EditorWindow private constructor(private val clip: Clip, private var saveP
             EditorWindow(clip).createAndShow()
         }
 
-        fun createEmptyGeneratorClip() {
-            EditorWindow(GeneratorClip.createEmpty()).createAndShow()
+        fun createEmptyGeneratorClip(callback: EditorCloseCallback? = null) {
+            EditorWindow(GeneratorClip.createEmpty(), callback).createAndShow()
         }
 
-        fun createEmptyEffectClip() {
-            EditorWindow(EffectClip.createEmpty()).createAndShow()
+        fun createEmptyEffectClip(callback: EditorCloseCallback? = null) {
+            EditorWindow(EffectClip.createEmpty(), callback).createAndShow()
         }
     }
 }

@@ -20,11 +20,11 @@ class ClipRack(
     val uuid: ObjectProperty<ClipRackUUID> = SimpleObjectProperty(ClipRackUUID()),
     generatorClips: Array<GeneratorClip?> = arrayOfNulls(36),
     effectClips: Array<EffectClip?> = arrayOfNulls(12),
-    lookupPaths: List<String> = emptyList(),
+    lookupPaths: Set<String> = emptySet(),
 ) {
     val generatorClips: ObservableList<GeneratorClip?>
     val effectClips: ObservableList<EffectClip?>
-    val lookupPaths: ArrayList<String> = arrayListOf()
+    val lookupPaths: HashSet<String> = hashSetOf()
 
     init {
         require(generatorClips.size <= 36)
@@ -54,7 +54,7 @@ class ClipRack(
             uuid: ClipRackUUID = ClipRackUUID(),
             generatorClips: Array<ClipRackSerializer.NameAndUUID?>,
             effectClips: Array<ClipRackSerializer.NameAndUUID?>,
-            lookupPaths: List<String> = listOf("."),
+            lookupPaths: Set<String> = setOf("."),
             ignoreMissing: Boolean = false,
         ): ClipRack {
             require(generatorClips.size <= 36)
@@ -109,5 +109,5 @@ class ClipRack(
 }
 
 @Suppress("MemberVisibilityCanBePrivate", "CanBeParameter", "unused", "RedundantSuppression")
-class ClipsNotFoundException(val clips: List<ClipRackSerializer.NameAndUUID>, val lookupLocations: List<String>) :
+class ClipsNotFoundException(val clips: List<ClipRackSerializer.NameAndUUID>, val lookupLocations: Set<String>) :
     Exception("Some Clips not found in search paths.")
