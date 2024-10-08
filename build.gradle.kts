@@ -51,6 +51,7 @@ val lwjglNatives = Pair(
 repositories {
     mavenCentral()
     maven("https://repo.eclipse.org/content/groups/efxclipse")
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -112,6 +113,7 @@ dependencies {
     // DriftFX
     implementation("org.eclipse.fx", "org.eclipse.fx.drift", "1.0.0")
 
+    implementation("com.github.defvs:heliosdac_jni:0.2")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
